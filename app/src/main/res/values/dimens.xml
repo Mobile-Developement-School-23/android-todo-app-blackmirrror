@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="text_size_title_large">32sp</dimen>
+    <dimen name="text_size_title">20sp</dimen>
+    <dimen name="text_size_button">14sp</dimen>
+    <dimen name="text_size_body">16sp</dimen>
+    <dimen name="text_size_subhead">14sp</dimen>
+
+    <dimen name="text_line_height_title_large">38sp</dimen>
+    <dimen name="text_line_height_title">32sp</dimen>
+    <dimen name="text_line_height_button">24sp</dimen>
+    <dimen name="text_line_height_body">20sp</dimen>
+    <dimen name="text_line_height_subhead">20sp</dimen>
+</resources>
