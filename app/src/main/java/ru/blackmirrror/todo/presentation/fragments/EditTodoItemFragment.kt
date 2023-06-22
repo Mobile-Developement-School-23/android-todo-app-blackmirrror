@@ -1,4 +1,4 @@
-package ru.blackmirrror.todo.ui
+package ru.blackmirrror.todo.presentation.fragments
 
 import android.app.DatePickerDialog
 import android.content.Context
@@ -17,12 +17,14 @@ import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
 import ru.blackmirrror.todo.R
+import ru.blackmirrror.todo.data.Importance
 import ru.blackmirrror.todo.data.TodoItem
 import ru.blackmirrror.todo.data.TodoItemRepository
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 import java.util.UUID
-import kotlin.properties.Delegates
 
 
 class EditTodoItemFragment : Fragment() {
@@ -42,6 +44,9 @@ class EditTodoItemFragment : Fragment() {
     private lateinit var repository: TodoItemRepository
     private lateinit var positionBundle: String
     var onDataUpdatedListener: OnDataUpdatedListener? = null
+
+    private var saveImportance: Importance = Importance.DEFAULT
+    private var saveDeadlineDate: Date = Date()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,8 +89,12 @@ class EditTodoItemFragment : Fragment() {
         val todoItem: TodoItem? = repository.getItem(positionBundle)
         if (todoItem != null) {
             textOfTodo.setText(todoItem.text)
-            importance.text = todoItem.importance
-            deadline.text = todoItem.deadline
+            saveImportance = todoItem.importance
+            setImportance(saveImportance)
+            if (todoItem.deadlineDate != null) {
+                saveDeadlineDate = todoItem.deadlineDate
+                deadline.text = formatDate(saveDeadlineDate)
+            }
         }
         deleteButton.isEnabled = true
         deleteButton.setOnClickListener {
@@ -109,32 +118,37 @@ class EditTodoItemFragment : Fragment() {
         deadlineSwitcher.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked)
                 showDatePickerDialog()
-            else
-                deadline.text = ""
         }
     }
 
     private fun showPopUpMenu() {
         val popupMenu = PopupMenu(requireContext(), changeImportance)
         popupMenu.inflate(R.menu.importance)
-        popupMenu.setOnMenuItemClickListener {
-            when (it.itemId) {
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            saveImportance = when (menuItem.itemId) {
                 R.id.action_default -> {
-                    importance.text = "Нет"
-                    true
+                    Importance.LOW
                 }
                 R.id.action_lower -> {
-                    importance.text = "Низкий"
-                    true
+                    Importance.DEFAULT
                 }
-                R.id.action_default -> {
-                    importance.text = "!!Высокий"
-                    true
+                R.id.action_higher -> {
+                    Importance.HIGH
                 }
-                else -> false
+                else -> Importance.LOW
             }
+            setImportance(saveImportance)
+            true
         }
         popupMenu.show()
+    }
+
+    private fun setImportance(saveImportance: Importance) {
+        when (saveImportance) {
+            Importance.DEFAULT -> importance.text = "Нет"
+            Importance.LOW -> importance.text = "Низкий"
+            Importance.HIGH -> importance.text = "!!Высокий"
+        }
     }
 
     private fun showDatePickerDialog() {
@@ -149,7 +163,8 @@ class EditTodoItemFragment : Fragment() {
             val year = datePickerDialog.datePicker.year
             val month = datePickerDialog.datePicker.month
             val dayOfMonth = datePickerDialog.datePicker.dayOfMonth
-            deadline.text = getDateFormatted(dayOfMonth, month, year)
+            saveDeadlineDate = Date(year, month, dayOfMonth)
+            deadline.text = formatDate(saveDeadlineDate)
         }
 
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Отмена") { _, _ ->
@@ -161,7 +176,7 @@ class EditTodoItemFragment : Fragment() {
 
     private fun saveItem() {
         if (textOfTodo.text.toString() == "") {
-            Toast.makeText(requireContext(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
             return
         }
         val todoItem = (if (positionBundle == "")
@@ -175,8 +190,8 @@ class EditTodoItemFragment : Fragment() {
                 TodoItem(
                     it1,
                     textOfTodo.text.toString(),
-                    importance.text.toString(),
-                    deadline.text.toString(),
+                    saveImportance,
+                    saveDeadlineDate,
                     it,
                     Date()
                 )
@@ -190,12 +205,9 @@ class EditTodoItemFragment : Fragment() {
         requireActivity().onBackPressed()
     }
 
-    private fun getDateFormatted(dayOfMonth: Int, month: Int, year: Int): String {
-        val months = arrayOf("января", "февраля", "марта", "апреля", "мая", "июня", "июля", "августа", "сентября", "октября", "ноября", "декабря")
-        val calendar = Calendar.getInstance()
-        calendar.set(year, month, dayOfMonth)
-        val monthText = months[calendar.get(Calendar.MONTH)]
-        return "$dayOfMonth $monthText $year г."
+    private fun formatDate(date: Date): String {
+        val sdf = SimpleDateFormat("d MMMM yyyy г.", Locale("ru"))
+        return sdf.format(date)
     }
 
     interface OnDataUpdatedListener {

@@ -1,4 +1,4 @@
-package ru.blackmirrror.todo.ui.todo_items
+package ru.blackmirrror.todo.presentation.adapters
 
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +13,8 @@ import ru.blackmirrror.todo.data.TodoItem
 
 
 class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
-                      private val listener: RecyclerViewItemClickListener): RecyclerView.Adapter<TodoItemAdapter.TodoItemViewHolder>() {
+                      private val listener: RecyclerViewItemClickListener
+): RecyclerView.Adapter<TodoItemAdapter.TodoItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo, parent, false)

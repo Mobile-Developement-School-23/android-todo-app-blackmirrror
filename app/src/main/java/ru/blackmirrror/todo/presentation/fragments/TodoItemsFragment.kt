@@ -1,4 +1,4 @@
-package ru.blackmirrror.todo.ui.todo_items
+package ru.blackmirrror.todo.presentation.fragments
 
 import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.TodoItemRepository
-import ru.blackmirrror.todo.ui.EditTodoItemFragment
+import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
 
 
 class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener,

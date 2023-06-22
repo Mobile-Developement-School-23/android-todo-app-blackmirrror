@@ -17,18 +17,10 @@ class TodoItemRepository private constructor() {
     }
 
     private var todoItems = mutableListOf(
-        TodoItem(UUID.randomUUID().toString(),"Купить продукты на неделю", "Нет", "22 июля 2022 г.", false, Date()),
-        TodoItem(UUID.randomUUID().toString(), "Заказать билеты в кино", "Низкая", "22 июля 2022 г.", true, Date()),
-        TodoItem(UUID.randomUUID().toString(), "Сделать домашнюю работу", "Высокая", "22 июля 2022 г.", false, Date()),
-        TodoItem(UUID.randomUUID().toString(), "Что-то ооочень длиииииииииинноеееееееее ооооооооооооооочень сииииииииииииииииииииииильно днииииииииииииииииииииинное", "Нет", "22 июля 2022 г.", false, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Посетить родственников", "Высокая", "22 июля 2022 г.", false, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Получить водительские права", "Низкая", "22 июля 2022 г.", true, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Купить продукты на неделю", "Нет", "22 июля 2022 г.", false, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Заказать билеты в кино", "Низкая", "22 июля 2022 г.", true, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Сделать домашнюю работу", "Высокая", "22 июля 2022 г.", false, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Разобраться с налогами", "Высокая", "22 июля 2022 г.", false, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Посетить родственников", "Нет", "22 июля 2022 г.", false, Date()),
-//        TodoItem(UUID.randomUUID().toString(), "Получить водительские права", "Низкая", "22 июля 2022 г.", true, Date()),
+        TodoItem(UUID.randomUUID().toString(),"Купить продукты на неделю", Importance.LOW, Date(), false, Date()),
+        TodoItem(UUID.randomUUID().toString(), "Заказать билеты в кино", Importance.DEFAULT, Date(), true, Date()),
+        TodoItem(UUID.randomUUID().toString(), "Сделать домашнюю работу", Importance.HIGH, Date(), false, Date()),
+        TodoItem(UUID.randomUUID().toString(), "Что-то ооочень длиииииииииинноеееееееее ооооооооооооооочень сииииииииииииииииииииииильно днииииииииииииииииииииинное", Importance.HIGH, Date(), false, Date()),
     )
 
     fun getAllTodoItems(): MutableList<TodoItem> {

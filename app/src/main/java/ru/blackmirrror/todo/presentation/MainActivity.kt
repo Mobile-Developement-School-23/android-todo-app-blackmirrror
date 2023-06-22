@@ -1,9 +1,10 @@
-package ru.blackmirrror.todo
+package ru.blackmirrror.todo.presentation
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import ru.blackmirrror.todo.ui.todo_items.TodoItemsFragment
+import ru.blackmirrror.todo.R
+import ru.blackmirrror.todo.presentation.fragments.TodoItemsFragment
 
 
 class MainActivity : AppCompatActivity() {
