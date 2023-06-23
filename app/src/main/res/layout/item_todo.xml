@@ -13,22 +13,39 @@
         android:minWidth="0dp"
         android:minHeight="0dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
     
-    <TextView
-        android:id="@+id/item_text"
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingHorizontal="12dp"
-        android:text="Задача"
-        android:textSize="@dimen/text_size_body"
-        android:lineHeight="@dimen/text_line_height_body"
-        android:maxLines="3"
-        android:ellipsize="end"
-        android:gravity="start"
+        android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/item_done"
-        app:layout_constraintEnd_toStartOf="@id/item_info_btn"/>
+        app:layout_constraintEnd_toStartOf="@id/item_info_btn">
+
+        <TextView
+            android:id="@+id/item_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:text="Задача"
+            android:textSize="@dimen/text_size_body"
+            android:lineHeight="@dimen/text_line_height_body"
+            android:maxLines="3"
+            android:ellipsize="end"
+            android:gravity="start"/>
+
+        <TextView
+            android:id="@+id/item_deadline"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingHorizontal="12dp"
+            android:text=""
+            android:textSize="@dimen/text_size_subhead"
+            android:lineHeight="@dimen/text_line_height_subhead"
+            android:gravity="start"/>
+
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/item_info_btn"

@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.TodoItem
+import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
 
 
 class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
@@ -29,12 +30,16 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
         holder.onBind(todoItems[position])
         val id = todoItems[position].id
 
+        holder.item.setOnClickListener {
+            listener.onItemClicked(id)
+        }
+
         holder.isDone.setOnCheckedChangeListener { _, isChecked ->
             listener.onCheckboxClicked(id, isChecked)
         }
 
         holder.info.setOnClickListener {
-            listener.onImageButtonClicked(id)
+            //listener.onImageButtonClicked(id)
         }
     }
 
@@ -61,19 +66,28 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
     }
 
     inner class TodoItemViewHolder(itemView: View):  ViewHolder(itemView){
+        val item = itemView
         val isDone: CheckBox = itemView.findViewById(R.id.item_done)
-        private val text: TextView = itemView.findViewById(R.id.item_text)
+        val text: TextView = itemView.findViewById(R.id.item_text)
         val info: ImageButton = itemView.findViewById(R.id.item_info_btn)
+        val deadline: TextView = itemView.findViewById(R.id.item_deadline)
 
         fun onBind(todoItem: TodoItem) {
             isDone.isChecked = todoItem.isDone
             text.text = todoItem.text
+            if (todoItem.deadlineDate != null) {
+                deadline.visibility = View.VISIBLE
+                deadline.text = formatDate(todoItem.deadlineDate)
+            }
+            else
+                deadline.visibility = View.GONE
         }
     }
 
     interface RecyclerViewItemClickListener {
         fun onCheckboxClicked(id: String, isChecked: Boolean)
-        fun onImageButtonClicked(id: String)
+        fun onItemClicked(id: String)
+        //fun onImageButtonClicked(id: String)
     }
 
 }

@@ -10,6 +10,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentTransaction
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -51,21 +52,15 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
 
         addItem = view.findViewById(R.id.main_add_btn)
         addItem.setOnClickListener {
-            replaceFragment(EditTodoItemFragment())
+            val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate()
+            findNavController().navigate(action)
         }
 
         toolbar = view.findViewById(R.id.toolbar_main)
         showAllTodoItems = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_remove_red_eye_24)!!
-        changeColor(R.color.color_light_gray_light)
+        //changeColor(R.color.color_gray_light)
         toolbar.navigationIcon = showAllTodoItems
         toolbar.subtitle = "Выполнено - ${repository.getDoneTodoItems().size}"
-    }
-
-    private fun replaceFragment(fragment: Fragment) {
-        val transaction: FragmentTransaction = fragmentManager?.beginTransaction() ?: return
-        transaction.replace(R.id.container, fragment)
-        transaction.addToBackStack(null)
-        transaction.commit()
     }
 
     private fun changeColor(color: Int) {
@@ -79,13 +74,9 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
         toolbar.subtitle = "Выполнено - ${repository.getDoneTodoItems().size}"
     }
 
-    override fun onImageButtonClicked(id: String) {
-        val bundle = Bundle()
-        bundle.putString("id", id)
-        val editFragment = EditTodoItemFragment()
-        editFragment.arguments = bundle
-        editFragment.onDataUpdatedListener = this
-        replaceFragment(editFragment)
+    override fun onItemClicked(id: String) {
+        val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate(id)
+        findNavController().navigate(action)
     }
 
     override fun onDataUpdated(id: String) {

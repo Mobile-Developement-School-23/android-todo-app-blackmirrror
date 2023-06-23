@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/todoItemsFragment">
+
+    <fragment
+        android:id="@+id/todoItemsFragment"
+        android:name="ru.blackmirrror.todo.presentation.fragments.TodoItemsFragment"
+        android:label="fragment_todo_items"
+        tools:layout="@layout/fragment_todo_items" >
+        <action
+            android:id="@+id/action_todoItemsFragment_to_editTodoItemFragment_create"
+            app:destination="@id/editTodoItemFragment">
+            <argument
+                android:name="todoItemId"
+                android:defaultValue="@null" />
+        </action>
+        <action
+            android:id="@+id/action_todoItemsFragment_to_editTodoItemFragment_update"
+            app:destination="@id/editTodoItemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/editTodoItemFragment"
+        android:name="ru.blackmirrror.todo.presentation.fragments.EditTodoItemFragment"
+        android:label="fragment_edit_todo_item"
+        tools:layout="@layout/fragment_edit_todo_item" >
+        <argument
+            android:name="todoItemId"
+            app:argType="string"
+            app:nullable="true" />
+    </fragment>
+</navigation>

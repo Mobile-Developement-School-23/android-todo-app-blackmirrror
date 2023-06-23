@@ -1,13 +1,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <style name="Theme.ToDoLight" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:textColor">@color/label_primary</item>
+        <item name="colorPrimary">@color/back_primary</item>
+        <item name="colorPrimaryDark">@color/back_primary</item>
+        <item name="colorAccent">@color/color_blue</item>
 
-        <item name="android:textColor">@color/label_light_primary</item>
+        <item name="android:statusBarColor">@color/back_primary</item>
 
-    </style>
+        <item name="android:windowBackground">@color/back_primary</item>
+        <item name="android:textColorPrimary">@color/label_primary</item>
+        <item name="android:textColorSecondary">@color/label_secondary</item>
+        <item name="colorControlNormal">@color/color_blue</item>
 
-    <style name="Theme.ToDoDark" parent="Theme.Material3.DayNight.NoActionBar">
-
-        <item name="android:textColor">@color/label_dark_primary</item>
     </style>
 </resources>

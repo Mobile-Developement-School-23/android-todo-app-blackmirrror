@@ -16,10 +16,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.Toolbar
+import androidx.navigation.fragment.findNavController
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.Importance
 import ru.blackmirrror.todo.data.TodoItem
 import ru.blackmirrror.todo.data.TodoItemRepository
+import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -42,16 +44,13 @@ class EditTodoItemFragment : Fragment() {
     private lateinit var deadline: TextView
 
     private lateinit var repository: TodoItemRepository
-    private lateinit var positionBundle: String
     var onDataUpdatedListener: OnDataUpdatedListener? = null
 
     private var saveImportance: Importance = Importance.DEFAULT
-    private var saveDeadlineDate: Date = Date()
+    private var saveDeadlineDate: Date? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        positionBundle = arguments?.getString("id", "") ?: ""
-    }
+    private lateinit var currentId: String
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -60,11 +59,18 @@ class EditTodoItemFragment : Fragment() {
         view = inflater.inflate(R.layout.fragment_edit_todo_item, container, false)
 
         repository = TodoItemRepository.getInstance()
+        //loadArgs()
         initEditFields()
         initToolbar()
 
         return view
     }
+
+//    private fun loadArgs() {
+//        currentItem = repository.getItem(args.todoItemId ?: return) ?: return
+//        //binding.edTodoItemText.setText(todoItem.text)
+//        //binding.swDeadline.isChecked = todoItem.deadlineTimestamp != null
+//    }
 
     private fun initToolbar() {
         toolbar = view.findViewById(R.id.toolbar_edit)
@@ -72,7 +78,7 @@ class EditTodoItemFragment : Fragment() {
         saveButton = view.findViewById(R.id.edit_save_btn)
         toolbar.setNavigationIcon(R.drawable.baseline_close_24)
         toolbar.setNavigationOnClickListener {
-            requireActivity().onBackPressed()
+            findNavController().popBackStack()
         }
         saveButton.setOnClickListener {
             saveItem()
@@ -81,26 +87,27 @@ class EditTodoItemFragment : Fragment() {
         deleteButton = view.findViewById(R.id.edit_delete_btn)
         deleteButton.isEnabled = false
 
-        if (positionBundle != "")
+        currentId = arguments?.getString("todoItemId", "").toString()
+        if (currentId != "")
             fillFields()
     }
 
     private fun fillFields() {
-        val todoItem: TodoItem? = repository.getItem(positionBundle)
-        if (todoItem != null) {
-            textOfTodo.setText(todoItem.text)
-            saveImportance = todoItem.importance
+        val currentItem: TodoItem? = repository.getItem(currentId)
+        if (currentItem != null) {
+            textOfTodo.setText(currentItem.text)
+            saveImportance = currentItem.importance
             setImportance(saveImportance)
-            if (todoItem.deadlineDate != null) {
-                saveDeadlineDate = todoItem.deadlineDate
-                deadline.text = formatDate(saveDeadlineDate)
+            if (currentItem.deadlineDate != null) {
+                saveDeadlineDate = currentItem.deadlineDate
+                deadline.text = formatDate(currentItem.deadlineDate)
             }
         }
         deleteButton.isEnabled = true
         deleteButton.setOnClickListener {
-            repository.removeItem(positionBundle)
-            onDataUpdatedListener?.onDataRemove(positionBundle)
-            requireActivity().onBackPressed()
+            repository.removeItem(currentId)
+            onDataUpdatedListener?.onDataRemove(currentId)
+            findNavController().popBackStack()
         }
     }
 
@@ -160,11 +167,11 @@ class EditTodoItemFragment : Fragment() {
         )
 
         datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Готово") { _, _ ->
-            val year = datePickerDialog.datePicker.year
+            val year = datePickerDialog.datePicker.year - 1900
             val month = datePickerDialog.datePicker.month
             val dayOfMonth = datePickerDialog.datePicker.dayOfMonth
             saveDeadlineDate = Date(year, month, dayOfMonth)
-            deadline.text = formatDate(saveDeadlineDate)
+            deadline.text = formatDate(Date(year, month, dayOfMonth))
         }
 
         datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Отмена") { _, _ ->
@@ -179,14 +186,14 @@ class EditTodoItemFragment : Fragment() {
             Toast.makeText(requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
             return
         }
-        val todoItem = (if (positionBundle == "")
+        val todoItem = (if (currentId == "")
             false
         else
-            repository.getItem(positionBundle)?.isDone)?.let {
-            (if (positionBundle == "")
+            repository.getItem(currentId)?.isDone)?.let {
+            (if (currentId == "")
                 UUID.randomUUID().toString()
             else
-                repository.getItem(positionBundle)?.id)?.let { it1 ->
+                repository.getItem(currentId)?.id)?.let { it1 ->
                 TodoItem(
                     it1,
                     textOfTodo.text.toString(),
@@ -197,17 +204,12 @@ class EditTodoItemFragment : Fragment() {
                 )
             }
         }
-        if (positionBundle == "")
+        if (currentId == "")
             todoItem?.let { repository.addTodoItem(it) }
         else
-            todoItem?.let { repository.updateItem(positionBundle, it) }
-        onDataUpdatedListener?.onDataUpdated(positionBundle)
-        requireActivity().onBackPressed()
-    }
-
-    private fun formatDate(date: Date): String {
-        val sdf = SimpleDateFormat("d MMMM yyyy г.", Locale("ru"))
-        return sdf.format(date)
+            todoItem?.let { repository.updateItem(currentId, it) }
+        onDataUpdatedListener?.onDataUpdated(currentId)
+        findNavController().popBackStack()
     }
 
     interface OnDataUpdatedListener {
