@@ -1,77 +1,82 @@
 package ru.blackmirrror.todo.presentation.fragments
 
-import android.graphics.PorterDuff
 import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import kotlinx.coroutines.launch
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.TodoItemRepository
+import ru.blackmirrror.todo.databinding.FragmentTodoItemsBinding
+import ru.blackmirrror.todo.presentation.adapters.SwipeTodoItem
 import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
 
 
 class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener,
     EditTodoItemFragment.OnDataUpdatedListener{
 
-    private lateinit var view: View
-    private lateinit var toolbar: Toolbar
+    private lateinit var binding: FragmentTodoItemsBinding
     private lateinit var showAllTodoItems: Drawable
 
-    private lateinit var items: RecyclerView
     private lateinit var adapter: TodoItemAdapter
-    private lateinit var addItem: FloatingActionButton
-
     private lateinit var repository: TodoItemRepository
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        view =  inflater.inflate(R.layout.fragment_todo_items, container, false)
+        binding = FragmentTodoItemsBinding.inflate(inflater, container, false)
         initFields()
+        //initSwipes(adapter)
 
-        return view
+        return binding.root
     }
 
     private fun initFields() {
         repository = TodoItemRepository.getInstance()
 
-        items = view.findViewById(R.id.rv_todo_items)
-        items.layoutManager = LinearLayoutManager(context)
+        binding.rvTodoItems.layoutManager = LinearLayoutManager(context)
         adapter = TodoItemAdapter(repository.getAllTodoItems(), this)
-        items.adapter = adapter
+        binding.rvTodoItems.adapter = adapter
 
-        addItem = view.findViewById(R.id.main_add_btn)
-        addItem.setOnClickListener {
+        binding.floatingButton.setOnClickListener {
             val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate()
             findNavController().navigate(action)
         }
-
-        toolbar = view.findViewById(R.id.toolbar_main)
-        showAllTodoItems = ContextCompat.getDrawable(requireContext(), R.drawable.baseline_remove_red_eye_24)!!
-        //changeColor(R.color.color_gray_light)
-        toolbar.navigationIcon = showAllTodoItems
-        toolbar.subtitle = "Выполнено - ${repository.getDoneTodoItems().size}"
+        binding.toolbarMain.title = "Мои дела"
+        binding.tvCount.text = "Выполнено - ${repository.getDoneTodoItems().size}"
     }
 
-    private fun changeColor(color: Int) {
-        showAllTodoItems.setColorFilter(ContextCompat.getColor(requireContext(), color), PorterDuff.Mode.SRC_IN)
+    private fun initSwipes(adapter: TodoItemAdapter) {
+        val swipeCallback = SwipeTodoItem(
+            onSwipeLeft = { position ->
+                val id = adapter.getItem(position).id
+                onCheckboxClicked(id, true)
+            },
+            onSwipeRight = { position ->
+                val id = adapter.getItem(position).id
+                onDataUpdated(id)
+            },
+            applicationContext = requireContext()
+        )
+
+        val itemTouchHelper = ItemTouchHelper(swipeCallback)
+        itemTouchHelper.attachToRecyclerView(binding.rvTodoItems)
     }
 
     override fun onCheckboxClicked(id: String, isChecked: Boolean) {
         adapter.getItem(id)?.isDone = isChecked
         adapter.getItem(id)?.let { repository.updateItem(id, it) }
         adapter.getItem(id)?.let { adapter.updateItem(id, it) }
-        toolbar.subtitle = "Выполнено - ${repository.getDoneTodoItems().size}"
+        binding.tvCount.text = "Выполнено - ${repository.getDoneTodoItems().size}"
+        //TODO зачеркивать item
     }
 
     override fun onItemClicked(id: String) {
@@ -88,5 +93,6 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
 
     override fun onDataRemove(id: String) {
         adapter.removeItem(id)
+        repository.removeItem(id)
     }
 }

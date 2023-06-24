@@ -1,54 +1,39 @@
 package ru.blackmirrror.todo.presentation.fragments
 
 import android.app.DatePickerDialog
+import android.app.Dialog
 import android.content.Context
 import android.content.DialogInterface
+import android.content.res.ColorStateList
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import android.widget.LinearLayout
-import android.widget.Switch
-import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
-import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.Importance
 import ru.blackmirrror.todo.data.TodoItem
 import ru.blackmirrror.todo.data.TodoItemRepository
+import ru.blackmirrror.todo.databinding.FragmentEditTodoItemBinding
 import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
-import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
-import java.util.Locale
 import java.util.UUID
 
 
 class EditTodoItemFragment : Fragment() {
 
-    private lateinit var view: View
-
-    private lateinit var toolbar: Toolbar
-    private lateinit var saveButton: Button
-    private lateinit var deleteButton: Button
-
-    private lateinit var textOfTodo: EditText
-    private lateinit var changeImportance: LinearLayout
-    private lateinit var importance: TextView
-    private lateinit var deadlineSwitcher: Switch
-    private lateinit var deadline: TextView
+    private lateinit var binding: FragmentEditTodoItemBinding
 
     private lateinit var repository: TodoItemRepository
     var onDataUpdatedListener: OnDataUpdatedListener? = null
 
     private var saveImportance: Importance = Importance.DEFAULT
     private var saveDeadlineDate: Date? = null
-
     private lateinit var currentId: String
 
 
@@ -56,36 +41,24 @@ class EditTodoItemFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        view = inflater.inflate(R.layout.fragment_edit_todo_item, container, false)
+        binding = FragmentEditTodoItemBinding.inflate(inflater, container, false)
 
         repository = TodoItemRepository.getInstance()
-        //loadArgs()
         initEditFields()
         initToolbar()
 
-        return view
+        return binding.root
     }
 
-//    private fun loadArgs() {
-//        currentItem = repository.getItem(args.todoItemId ?: return) ?: return
-//        //binding.edTodoItemText.setText(todoItem.text)
-//        //binding.swDeadline.isChecked = todoItem.deadlineTimestamp != null
-//    }
-
     private fun initToolbar() {
-        toolbar = view.findViewById(R.id.toolbar_edit)
-        toolbar.title = ""
-        saveButton = view.findViewById(R.id.edit_save_btn)
-        toolbar.setNavigationIcon(R.drawable.baseline_close_24)
-        toolbar.setNavigationOnClickListener {
+        binding.toolbarEdit.title = ""
+        binding.toolbarEdit.setNavigationIcon(R.drawable.baseline_close_24)
+        binding.toolbarEdit.setNavigationOnClickListener {
             findNavController().popBackStack()
         }
-        saveButton.setOnClickListener {
+        binding.editSaveBtn.setOnClickListener {
             saveItem()
         }
-
-        deleteButton = view.findViewById(R.id.edit_delete_btn)
-        deleteButton.isEnabled = false
 
         currentId = arguments?.getString("todoItemId", "").toString()
         if (currentId != "")
@@ -95,16 +68,18 @@ class EditTodoItemFragment : Fragment() {
     private fun fillFields() {
         val currentItem: TodoItem? = repository.getItem(currentId)
         if (currentItem != null) {
-            textOfTodo.setText(currentItem.text)
+            binding.editText.setText(currentItem.text)
             saveImportance = currentItem.importance
             setImportance(saveImportance)
             if (currentItem.deadlineDate != null) {
                 saveDeadlineDate = currentItem.deadlineDate
-                deadline.text = formatDate(currentItem.deadlineDate)
+                binding.editDeadline.text = formatDate(currentItem.deadlineDate)
             }
         }
-        deleteButton.isEnabled = true
-        deleteButton.setOnClickListener {
+        binding.editDeleteBtn.isEnabled = true
+        binding.editDeleteBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.color_red))
+        binding.ivDelete.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
+        binding.editDeleteBtn.setOnClickListener {
             repository.removeItem(currentId)
             onDataUpdatedListener?.onDataRemove(currentId)
             findNavController().popBackStack()
@@ -112,32 +87,25 @@ class EditTodoItemFragment : Fragment() {
     }
 
     private fun initEditFields() {
-        textOfTodo = view.findViewById(R.id.edit_text)
-
-        changeImportance = view.findViewById(R.id.edit_change_importance)
-        importance = view.findViewById(R.id.edit_importance)
-        changeImportance.setOnClickListener {
+        binding.editChangeImportance.setOnClickListener {
             showPopUpMenu()
         }
-
-        deadlineSwitcher = view.findViewById(R.id.edit_switch_deadline)
-        deadline = view.findViewById(R.id.edit_deadline)
-        deadlineSwitcher.setOnCheckedChangeListener { _, isChecked ->
+        binding.editSwitchDeadline.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked)
                 showDatePickerDialog()
         }
     }
 
     private fun showPopUpMenu() {
-        val popupMenu = PopupMenu(requireContext(), changeImportance)
+        val popupMenu = PopupMenu(requireContext(), binding.editChangeImportance)
         popupMenu.inflate(R.menu.importance)
         popupMenu.setOnMenuItemClickListener { menuItem ->
             saveImportance = when (menuItem.itemId) {
                 R.id.action_default -> {
-                    Importance.LOW
+                    Importance.DEFAULT
                 }
                 R.id.action_lower -> {
-                    Importance.DEFAULT
+                    Importance.LOW
                 }
                 R.id.action_higher -> {
                     Importance.HIGH
@@ -152,9 +120,9 @@ class EditTodoItemFragment : Fragment() {
 
     private fun setImportance(saveImportance: Importance) {
         when (saveImportance) {
-            Importance.DEFAULT -> importance.text = "Нет"
-            Importance.LOW -> importance.text = "Низкий"
-            Importance.HIGH -> importance.text = "!!Высокий"
+            Importance.DEFAULT -> binding.editImportance.text = "Нет"
+            Importance.LOW -> binding.editImportance.text = "Низкий"
+            Importance.HIGH -> binding.editImportance.text = "!!Высокий"
         }
     }
 
@@ -166,23 +134,25 @@ class EditTodoItemFragment : Fragment() {
             calendar.get(Calendar.DAY_OF_MONTH)
         )
 
-        datePickerDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Готово") { _, _ ->
+        datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, "Готово") { _, _ ->
             val year = datePickerDialog.datePicker.year - 1900
             val month = datePickerDialog.datePicker.month
             val dayOfMonth = datePickerDialog.datePicker.dayOfMonth
             saveDeadlineDate = Date(year, month, dayOfMonth)
-            deadline.text = formatDate(Date(year, month, dayOfMonth))
+            binding.editDeadline.text = formatDate(Date(year, month, dayOfMonth))
+        }
+        datePickerDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, "Отмена") { _, _ ->
+            binding.editSwitchDeadline.isChecked = false
         }
 
-        datePickerDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Отмена") { _, _ ->
-            deadlineSwitcher.isChecked = false
-        }
         datePickerDialog.setCancelable(false)
         datePickerDialog.show()
+        datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+        datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
     }
 
     private fun saveItem() {
-        if (textOfTodo.text.toString() == "") {
+        if (binding.editText.text.toString() == "") {
             Toast.makeText(requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
             return
         }
@@ -196,7 +166,7 @@ class EditTodoItemFragment : Fragment() {
                 repository.getItem(currentId)?.id)?.let { it1 ->
                 TodoItem(
                     it1,
-                    textOfTodo.text.toString(),
+                    binding.editText.text.toString(),
                     saveImportance,
                     saveDeadlineDate,
                     it,
