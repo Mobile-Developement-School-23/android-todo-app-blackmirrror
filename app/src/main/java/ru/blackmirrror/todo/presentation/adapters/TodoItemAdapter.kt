@@ -8,18 +8,26 @@ import android.widget.CheckBox
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import ru.blackmirrror.todo.R
-import ru.blackmirrror.todo.data.Importance
-import ru.blackmirrror.todo.data.TodoItem
+import ru.blackmirrror.todo.data.models.Importance
+import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
 
 
-class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
+class TodoItemAdapter(
                       private val listener: RecyclerViewItemClickListener
 ): RecyclerView.Adapter<TodoItemAdapter.TodoItemViewHolder>() {
+
+    private var todoItems: List<TodoItem> = listOf()
+
+    fun setList(todoItems: List<TodoItem>) {
+        this.todoItems = todoItems
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo, parent, false)
@@ -35,11 +43,11 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
         val id = todoItems[position].id
 
         holder.item.setOnClickListener {
-            listener.onItemClicked(id)
+            listener.onItemClicked(id, todoItems[position])
         }
 
         holder.isDone.setOnCheckedChangeListener { _, isChecked ->
-            listener.onCheckboxClicked(id, isChecked)
+            listener.onCheckboxClicked(isChecked, todoItems[position])
         }
     }
 
@@ -52,7 +60,7 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
     }
 
     fun addNewItem(todoItem: TodoItem) {
-        todoItems.add(todoItem)
+        //todoItems.add(todoItem)
         val pos = todoItems.indexOf(todoItem)
         //notifyItemInserted(pos)
     }
@@ -60,7 +68,7 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
     fun updateItem(id: String, todoItem: TodoItem): Boolean {
         val index = todoItems.indexOfFirst { it.id == id }
         if (index == -1) return false
-        todoItems[index] = todoItem
+        //todoItems[index] = todoItem
         //notifyItemChanged(index)
         return true
     }
@@ -68,7 +76,7 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
     fun removeItem(id: String): Boolean {
         val index = todoItems.indexOfFirst { it.id == id }
         if (index == -1) return false
-        todoItems.removeAt(index)
+        //todoItems.removeAt(index)
         //notifyItemRemoved(index)
         return true
     }
@@ -87,11 +95,25 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
             if (todoItem.isDone) {
                 text.setTextColor(ContextCompat.getColor(item.context, R.color.label_secondary))
                 text.paintFlags = text.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                importance.setImageResource(0)
+                isDone.buttonTintList = AppCompatResources.getColorStateList(
+                    itemView.context,
+                    R.color.color_green
+                )
             }
-            if (todoItem.importance == Importance.LOW)
-                importance.setImageResource(R.drawable.ic_importance_low)
-            else if (todoItem.importance == Importance.HIGH)
-                importance.setImageResource(R.drawable.ic_importance_high)
+            else {
+                text.setTextColor(ContextCompat.getColor(item.context, R.color.label_primary))
+                text.paintFlags = 0
+                if (todoItem.importance == Importance.LOW)
+                    importance.setImageResource(R.drawable.ic_importance_low)
+                else if (todoItem.importance == Importance.IMPORTANT) {
+                    importance.setImageResource(R.drawable.ic_importance_high)
+                    isDone.buttonTintList = AppCompatResources.getColorStateList(
+                        itemView.context,
+                        R.color.color_red
+                    )
+                }
+            }
             if (todoItem.deadlineDate != null) {
                 deadline.visibility = View.VISIBLE
                 deadline.text = formatDate(todoItem.deadlineDate)
@@ -102,8 +124,8 @@ class TodoItemAdapter(private var todoItems: MutableList<TodoItem>,
     }
 
     interface RecyclerViewItemClickListener {
-        fun onCheckboxClicked(id: String, isChecked: Boolean)
-        fun onItemClicked(id: String)
+        fun onCheckboxClicked(isChecked: Boolean, todoItem: TodoItem)
+        fun onItemClicked(id: String, todoItem: TodoItem)
     }
 
 }
