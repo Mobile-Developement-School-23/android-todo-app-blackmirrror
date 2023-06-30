@@ -104,6 +104,10 @@ class TodoItemAdapter(
             else {
                 text.setTextColor(ContextCompat.getColor(item.context, R.color.label_primary))
                 text.paintFlags = 0
+                isDone.buttonTintList = AppCompatResources.getColorStateList(
+                    itemView.context,
+                    R.color.support_separator
+                )
                 if (todoItem.importance == Importance.LOW)
                     importance.setImageResource(R.drawable.ic_importance_low)
                 else if (todoItem.importance == Importance.IMPORTANT) {

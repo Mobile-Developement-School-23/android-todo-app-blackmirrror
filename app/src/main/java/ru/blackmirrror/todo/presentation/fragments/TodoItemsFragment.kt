@@ -20,8 +20,7 @@ import ru.blackmirrror.todo.presentation.adapters.SwipeTodoItem
 import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
 
 
-class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener,
-    EditTodoItemFragment.OnDataUpdatedListener{
+class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener {
 
     private lateinit var binding: FragmentTodoItemsBinding
     private lateinit var showAllTodoItems: Drawable
@@ -39,7 +38,6 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
     }
 
     private fun initFields() {
-        //todoItemsViewModel = ViewModelProvider(this)[TodoItemsViewModel::class.java]
         adapterApi = TodoItemAdapter(this)
 
         lifecycleScope.launch {
@@ -62,13 +60,12 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
             findNavController().navigate(action)
         }
         binding.toolbarMain.title = "Мои дела"
-        //binding.tvCount.text = "Выполнено - ${todoItemsViewModel.getCountOfCompleteTodoList()}"
     }
 
     private fun initSwipes(adapter: TodoItemAdapter) {
         val swipeCallback = SwipeTodoItem(
             onSwipeLeft = { position ->
-                onDataRemove(adapter.getItem(position))
+                todoItemsViewModel.deleteTask(adapter.getItem(position))
             },
             onSwipeRight = { position ->
                 onCheckboxClicked( true, adapter.getItem(position))
@@ -82,28 +79,12 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
 
     override fun onCheckboxClicked(isChecked: Boolean, todoItem: TodoItem) {
         todoItem.isDone = isChecked
-        todoItemsViewModel.updateTask(todoItem, requireContext())
+        todoItemsViewModel.updateTask(todoItem)
     }
 
     override fun onItemClicked(id: String, todoItem: TodoItem) {
         Log.d("API", "onItemClicked: $todoItem")
         val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate(todoItem)
         findNavController().navigate(action)
-    }
-
-    override fun onDataSave(todoItem: TodoItem) {
-        todoItemsViewModel.createTask(todoItem, requireContext())
-    }
-
-    override fun onDataUpdated(id: String) {
-        Log.d("API", "onDataUpdated: $id")
-        //Log.d("API", "onDataUpdated: $todoItemsViewModel")
-        //todoItemsViewModel.updateTask(todoItem, requireContext())
-    }
-
-    override fun onDataRemove(todoItem: TodoItem) {
-        todoItemsViewModel.deleteTask(todoItem, requireContext())
-        //adapter.removeItem(id)
-        //repository.removeItem(id)
     }
 }

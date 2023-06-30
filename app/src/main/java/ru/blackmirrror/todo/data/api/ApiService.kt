@@ -9,41 +9,41 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import ru.blackmirrror.todo.data.api.models.ToDoApiRequestElement
-import ru.blackmirrror.todo.data.api.models.ToDoApiRequestList
-import ru.blackmirrror.todo.data.api.models.ToDoApiResponseElement
-import ru.blackmirrror.todo.data.api.models.ToDoApiResponseList
+import ru.blackmirrror.todo.data.api.models.TodoRequestElement
+import ru.blackmirrror.todo.data.api.models.TodoRequestList
+import ru.blackmirrror.todo.data.api.models.TodoResponseElement
+import ru.blackmirrror.todo.data.api.models.TodoResponseList
 
 
 interface ApiService {
     @GET("list")
-    suspend fun getList(): Response<ToDoApiResponseList>
+    suspend fun getList(): Response<TodoResponseList>
 
     @PATCH("list")
     suspend fun updateList(
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
-        @Body body: ToDoApiRequestList
-    ): Response<ToDoApiResponseList>
+        @Body body: TodoRequestList
+    ): Response<TodoResponseList>
 
     @GET("list/{id}")
-    suspend fun getTaskById(@Path("id") itemId: String): Response<ToDoApiResponseElement>
+    suspend fun getTaskById(@Path("id") itemId: String): Response<TodoResponseElement>
 
     @POST("list")
     suspend fun addTask(
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
-        @Body newItem: ToDoApiRequestElement
-    ): Response<ToDoApiResponseElement>
+        @Body newItem: TodoRequestElement
+    ): Response<TodoResponseElement>
 
     @PUT("list/{id}")
     suspend fun updateTask(
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
         @Path("id") itemId: String,
-        @Body body: ToDoApiRequestElement
-    ): Response<ToDoApiResponseElement>
+        @Body body: TodoRequestElement
+    ): Response<TodoResponseElement>
 
     @DELETE("list/{id}")
     suspend fun deleteTask(
         @Header("X-Last-Known-Revision") lastKnownRevision: Int,
         @Path("id") itemId: String,
-    ): Response<ToDoApiResponseElement>
+    ): Response<TodoResponseElement>
 }

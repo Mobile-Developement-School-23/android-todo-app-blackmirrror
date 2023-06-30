@@ -30,14 +30,10 @@ class EditTodoItemFragment : Fragment() {
 
     private lateinit var binding: FragmentEditTodoItemBinding
 
-    //private lateinit var repository: TodoItemRepository
     private val todoItemsViewModel: TodoItemsViewModel by activityViewModels()
-
-    var onDataUpdatedListener: OnDataUpdatedListener? = null
 
     private var saveImportance: Importance = Importance.BASIC
     private var saveDeadlineDate: Date? = null
-    //private lateinit var currentId: String
     private var currentTodoItem: TodoItem? = null
 
 
@@ -47,8 +43,6 @@ class EditTodoItemFragment : Fragment() {
     ): View {
         binding = FragmentEditTodoItemBinding.inflate(inflater, container, false)
 
-        //todoItemsViewModel = ViewModelProvider(this)[TodoItemsViewModel::class.java]
-        //repository = TodoItemRepository.getInstance()
         initEditFields()
         initToolbar()
 
@@ -61,10 +55,7 @@ class EditTodoItemFragment : Fragment() {
             EditTodoItemFragmentArg(it.getParcelable("todoItem"))
         } ?: throw IllegalArgumentException("Arguments not provided.")
         currentTodoItem = args.todoItem
-        //val currentId = arguments?.getString("todoItemId", "").toString()
         lifecycleScope.launch {
-            //currentTodoItem = todoItemsViewModel.getTodoItemById(currentId)
-            Log.d("API", "onViewCreated: $currentTodoItem")
             currentTodoItem?.let { fillFields(it) }
         }
     }
@@ -74,6 +65,7 @@ class EditTodoItemFragment : Fragment() {
         binding.toolbarEdit.setNavigationIcon(R.drawable.baseline_close_24)
         binding.toolbarEdit.setNavigationOnClickListener {
             findNavController().popBackStack()
+            todoItemsViewModel.initData()
         }
         binding.editSaveBtn.setOnClickListener {
             saveItem()
@@ -81,7 +73,6 @@ class EditTodoItemFragment : Fragment() {
     }
 
     private fun fillFields(currentTodoItem: TodoItem) {
-        Log.d("API", "fillFields: $currentTodoItem")
         binding.editText.setText(currentTodoItem.text)
         saveImportance = currentTodoItem.importance
         setImportance(saveImportance)
@@ -93,8 +84,7 @@ class EditTodoItemFragment : Fragment() {
         binding.editDeleteBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.ivDelete.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.editDeleteBtn.setOnClickListener {
-            todoItemsViewModel.deleteTask(currentTodoItem, requireContext())
-            //onDataUpdatedListener?.onDataRemove(currentId)
+            todoItemsViewModel.deleteTask(currentTodoItem)
             findNavController().popBackStack()
         }
     }
@@ -170,34 +160,15 @@ class EditTodoItemFragment : Fragment() {
             return
         }
         currentTodoItem?.let {
-            Log.d("APO", "saveItem: ")
-            Log.d("APO", "saveItem: $onDataUpdatedListener")
-            onDataUpdatedListener?.onDataUpdated(
-//                createTodoItem(
-//                    currentTodoItem!!.id,
-//                    currentTodoItem!!.createdDate,
-//                    currentTodoItem!!.isDone
-//                )
-            "ddf"
-            )
             todoItemsViewModel.updateTask(
                 createTodoItem(
                     currentTodoItem!!.id,
                     currentTodoItem!!.createdDate,
                     currentTodoItem!!.isDone
-                ),
-                requireContext()
+                )
             )
         }?: run {
             todoItemsViewModel.createTask(
-                createTodoItem(
-                    UUID.randomUUID().toString(),
-                    null,
-                    false
-                ),
-                requireContext()
-            )
-            onDataUpdatedListener?.onDataSave(
                 createTodoItem(
                     UUID.randomUUID().toString(),
                     null,
@@ -218,19 +189,5 @@ class EditTodoItemFragment : Fragment() {
             Date(),
             dateOfCreated
         )
-    }
-
-    interface OnDataUpdatedListener {
-        fun onDataSave(todoItem: TodoItem)
-        fun onDataUpdated(id: String)
-        fun onDataRemove(todoItem: TodoItem)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        try {
-            onDataUpdatedListener = context as OnDataUpdatedListener
-        } catch (_: ClassCastException) {
-        }
     }
 }

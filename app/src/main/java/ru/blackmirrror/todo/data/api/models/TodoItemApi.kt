@@ -7,37 +7,37 @@ import ru.blackmirrror.todo.data.models.ImportanceAdapter
 import ru.blackmirrror.todo.data.models.TodoItem
 import java.util.Date
 
-data class ToDoApiResponseList(
+data class TodoResponseList(
     @SerializedName("status")
     val status: String,
     @SerializedName("revision")
     val revision: Int,
     @SerializedName("list")
-    val list: List<ToDoItemResponseRequest>
+    val list: List<TodoItemApi>
 )
 
-data class ToDoApiRequestList(
+data class TodoRequestList(
     @SerializedName("status")
     val status: String,
     @SerializedName("list")
-    val list: List<ToDoItemResponseRequest>
+    val list: List<TodoItemApi>
 )
 
-data class ToDoApiResponseElement(
+data class TodoResponseElement(
     @SerializedName("revision")
     val revision: Int,
     @SerializedName("status")
     val status: String,
     @SerializedName("element")
-    val element: ToDoItemResponseRequest
+    val element: TodoItemApi
 )
 
-data class ToDoApiRequestElement(
+data class TodoRequestElement(
     @SerializedName("element")
-    val element: ToDoItemResponseRequest
+    val element: TodoItemApi
 )
 
-data class ToDoItemResponseRequest(
+data class TodoItemApi(
     @SerializedName("id")
     val id: String,
 
@@ -66,7 +66,7 @@ data class ToDoItemResponseRequest(
     @SerializedName("text")
     val text: String
 ) {
-    fun toToDoItem(): TodoItem = TodoItem(
+    fun fromApiToTodoItem(): TodoItem = TodoItem(
         id,
         text,
         importance,
@@ -76,8 +76,8 @@ data class ToDoItemResponseRequest(
         Date(changed_at)
     )
     companion object {
-        fun fromToDoTask(toDoItem: TodoItem, deviseId: String): ToDoItemResponseRequest {
-            return ToDoItemResponseRequest(
+        fun fromTodoItemToApi(toDoItem: TodoItem, deviseId: String): TodoItemApi {
+            return TodoItemApi(
                 id = toDoItem.id,
                 text = toDoItem.text,
                 importance = toDoItem.importance,
