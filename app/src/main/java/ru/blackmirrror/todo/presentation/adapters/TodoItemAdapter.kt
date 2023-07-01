@@ -29,6 +29,10 @@ class TodoItemAdapter(
         notifyDataSetChanged()
     }
 
+    fun getList(): List<TodoItem> {
+        return todoItems
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TodoItemViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_todo, parent, false)
         return TodoItemViewHolder(view)
@@ -51,34 +55,8 @@ class TodoItemAdapter(
         }
     }
 
-    fun getItem(id: String): TodoItem? {
-        return todoItems.find { it.id == id }
-    }
-
     fun getItem(position: Int): TodoItem {
         return todoItems[position]
-    }
-
-    fun addNewItem(todoItem: TodoItem) {
-        //todoItems.add(todoItem)
-        val pos = todoItems.indexOf(todoItem)
-        //notifyItemInserted(pos)
-    }
-
-    fun updateItem(id: String, todoItem: TodoItem): Boolean {
-        val index = todoItems.indexOfFirst { it.id == id }
-        if (index == -1) return false
-        //todoItems[index] = todoItem
-        //notifyItemChanged(index)
-        return true
-    }
-
-    fun removeItem(id: String): Boolean {
-        val index = todoItems.indexOfFirst { it.id == id }
-        if (index == -1) return false
-        //todoItems.removeAt(index)
-        //notifyItemRemoved(index)
-        return true
     }
 
     inner class TodoItemViewHolder(itemView: View):  ViewHolder(itemView){

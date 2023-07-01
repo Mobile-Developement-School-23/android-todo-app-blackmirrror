@@ -92,7 +92,7 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
             viewModelScope.launch(Dispatchers.IO) {
                 when (val response = repository.createRemoteOneTask(todoItem, sharedPrefs.getRevision())) {
                     is NetworkState.Success -> println("create")
-                    is NetworkState.Error -> println("Internet error ${response.response.code()}")
+                    is NetworkState.Error -> toast("Пока не можем сохранить данные")
                 }
             }
         }
@@ -107,7 +107,7 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
             viewModelScope.launch(Dispatchers.IO) {
                 when (val response = repository.updateRemoteOneTask(newItem, sharedPrefs.getRevision())) {
                     is NetworkState.Success -> println("update")
-                    is NetworkState.Error -> println("Internet error ${response.response.code()}")
+                    is NetworkState.Error -> toast("Пока не можем обновить данные")
                 }
             }
         }
@@ -122,7 +122,7 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
             viewModelScope.launch(Dispatchers.IO) {
                 when (val response = repository.deleteRemoteOneTask(todoItem, sharedPrefs.getRevision())) {
                     is NetworkState.Success -> println("Delete")
-                    is NetworkState.Error -> println("Internet error ${response.response.code()}")
+                    is NetworkState.Error -> toast("Пока не можем удалить данные")
                 }
             }
         }

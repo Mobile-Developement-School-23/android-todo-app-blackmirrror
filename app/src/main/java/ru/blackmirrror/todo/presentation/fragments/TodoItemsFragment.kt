@@ -1,6 +1,5 @@
 package ru.blackmirrror.todo.presentation.fragments
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +13,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.databinding.FragmentTodoItemsBinding
 import ru.blackmirrror.todo.presentation.adapters.SwipeTodoItem
@@ -23,9 +23,9 @@ import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
 class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener {
 
     private lateinit var binding: FragmentTodoItemsBinding
-    private lateinit var showAllTodoItems: Drawable
+    private var visibleDone: Boolean = false
 
-    private lateinit var adapterApi: TodoItemAdapter
+    private lateinit var adapter: TodoItemAdapter
     private val todoItemsViewModel: TodoItemsViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -38,11 +38,11 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
     }
 
     private fun initFields() {
-        adapterApi = TodoItemAdapter(this)
+        adapter = TodoItemAdapter(this)
 
         lifecycleScope.launch {
             todoItemsViewModel.tasks.collect { tasks ->
-                adapterApi.setList(tasks)
+                adapter.setList(tasks)
             }
         }
         lifecycleScope.launch {
@@ -51,9 +51,19 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
             }
         }
 
+        binding.ivVisible.setOnClickListener {
+            visibleDone = if (visibleDone) {
+                binding.ivVisible.setImageResource(R.drawable.ic_visibility_off)
+                false
+            } else {
+                binding.ivVisible.setImageResource(R.drawable.ic_visibility_on)
+                true
+            }
+        }
+
         binding.rvTodoItems.layoutManager = LinearLayoutManager(context)
-        binding.rvTodoItems.adapter = adapterApi
-        initSwipes(adapterApi)
+        binding.rvTodoItems.adapter = adapter
+        initSwipes(adapter)
 
         binding.floatingButton.setOnClickListener {
             val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate()
