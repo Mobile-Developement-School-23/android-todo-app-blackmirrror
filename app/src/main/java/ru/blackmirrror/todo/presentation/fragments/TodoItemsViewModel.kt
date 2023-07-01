@@ -133,6 +133,6 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
     }
 
     private fun toast(message: String) {
-        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        //Toast.makeText(context, message, Toast.LENGTH_LONG).show()
     }
 }
