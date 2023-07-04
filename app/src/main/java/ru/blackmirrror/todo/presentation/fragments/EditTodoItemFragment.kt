@@ -1,11 +1,10 @@
 package ru.blackmirrror.todo.presentation.fragments
 
 import android.app.DatePickerDialog
-import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +12,13 @@ import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.launch
 import ru.blackmirrror.todo.R
-import ru.blackmirrror.todo.data.Importance
-import ru.blackmirrror.todo.data.TodoItem
-import ru.blackmirrror.todo.data.TodoItemRepository
+import ru.blackmirrror.todo.data.models.Importance
+import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.databinding.FragmentEditTodoItemBinding
 import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
 import java.util.Calendar
@@ -29,12 +30,11 @@ class EditTodoItemFragment : Fragment() {
 
     private lateinit var binding: FragmentEditTodoItemBinding
 
-    private lateinit var repository: TodoItemRepository
-    var onDataUpdatedListener: OnDataUpdatedListener? = null
+    private val todoItemsViewModel: TodoItemsViewModel by activityViewModels()
 
-    private var saveImportance: Importance = Importance.DEFAULT
+    private var saveImportance: Importance = Importance.BASIC
     private var saveDeadlineDate: Date? = null
-    private lateinit var currentId: String
+    private var currentTodoItem: TodoItem? = null
 
 
     override fun onCreateView(
@@ -43,11 +43,21 @@ class EditTodoItemFragment : Fragment() {
     ): View {
         binding = FragmentEditTodoItemBinding.inflate(inflater, container, false)
 
-        repository = TodoItemRepository.getInstance()
         initEditFields()
         initToolbar()
 
         return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val args: EditTodoItemFragmentArg = arguments?.let {
+            EditTodoItemFragmentArg(it.getParcelable("todoItem"))
+        } ?: throw IllegalArgumentException("Arguments not provided.")
+        currentTodoItem = args.todoItem
+        lifecycleScope.launch {
+            currentTodoItem?.let { fillFields(it) }
+        }
     }
 
     private fun initToolbar() {
@@ -55,33 +65,26 @@ class EditTodoItemFragment : Fragment() {
         binding.toolbarEdit.setNavigationIcon(R.drawable.baseline_close_24)
         binding.toolbarEdit.setNavigationOnClickListener {
             findNavController().popBackStack()
+            todoItemsViewModel.initData()
         }
         binding.editSaveBtn.setOnClickListener {
             saveItem()
         }
-
-        currentId = arguments?.getString("todoItemId", "").toString()
-        if (currentId != "")
-            fillFields()
     }
 
-    private fun fillFields() {
-        val currentItem: TodoItem? = repository.getItem(currentId)
-        if (currentItem != null) {
-            binding.editText.setText(currentItem.text)
-            saveImportance = currentItem.importance
-            setImportance(saveImportance)
-            if (currentItem.deadlineDate != null) {
-                saveDeadlineDate = currentItem.deadlineDate
-                binding.editDeadline.text = formatDate(currentItem.deadlineDate)
-            }
+    private fun fillFields(currentTodoItem: TodoItem) {
+        binding.editText.setText(currentTodoItem.text)
+        saveImportance = currentTodoItem.importance
+        setImportance(saveImportance)
+        if (currentTodoItem.deadlineDate != null) {
+            saveDeadlineDate = currentTodoItem.deadlineDate
+            binding.editDeadline.text = formatDate(currentTodoItem.deadlineDate)
         }
         binding.editDeleteBtn.isEnabled = true
         binding.editDeleteBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.ivDelete.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.editDeleteBtn.setOnClickListener {
-            repository.removeItem(currentId)
-            onDataUpdatedListener?.onDataRemove(currentId)
+            todoItemsViewModel.deleteTask(currentTodoItem)
             findNavController().popBackStack()
         }
     }
@@ -102,15 +105,15 @@ class EditTodoItemFragment : Fragment() {
         popupMenu.setOnMenuItemClickListener { menuItem ->
             saveImportance = when (menuItem.itemId) {
                 R.id.action_default -> {
-                    Importance.DEFAULT
+                    Importance.BASIC
                 }
                 R.id.action_lower -> {
                     Importance.LOW
                 }
                 R.id.action_higher -> {
-                    Importance.HIGH
+                    Importance.IMPORTANT
                 }
-                else -> Importance.LOW
+                else -> Importance.BASIC
             }
             setImportance(saveImportance)
             true
@@ -120,9 +123,9 @@ class EditTodoItemFragment : Fragment() {
 
     private fun setImportance(saveImportance: Importance) {
         when (saveImportance) {
-            Importance.DEFAULT -> binding.editImportance.text = "Нет"
+            Importance.BASIC -> binding.editImportance.text = "Нет"
             Importance.LOW -> binding.editImportance.text = "Низкий"
-            Importance.HIGH -> binding.editImportance.text = "!!Высокий"
+            Importance.IMPORTANT -> binding.editImportance.text = "!!Высокий"
         }
     }
 
@@ -156,42 +159,35 @@ class EditTodoItemFragment : Fragment() {
             Toast.makeText(requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
             return
         }
-        val todoItem = (if (currentId == "")
-            false
-        else
-            repository.getItem(currentId)?.isDone)?.let {
-            (if (currentId == "")
-                UUID.randomUUID().toString()
-            else
-                repository.getItem(currentId)?.id)?.let { it1 ->
-                TodoItem(
-                    it1,
-                    binding.editText.text.toString(),
-                    saveImportance,
-                    saveDeadlineDate,
-                    it,
-                    Date()
+        currentTodoItem?.let {
+            todoItemsViewModel.updateTask(
+                createTodoItem(
+                    currentTodoItem!!.id,
+                    currentTodoItem!!.createdDate,
+                    currentTodoItem!!.isDone
                 )
-            }
+            )
+        }?: run {
+            todoItemsViewModel.createTask(
+                createTodoItem(
+                    UUID.randomUUID().toString(),
+                    null,
+                    false
+                )
+            )
         }
-        if (currentId == "")
-            todoItem?.let { repository.addTodoItem(it) }
-        else
-            todoItem?.let { repository.updateItem(currentId, it) }
-        onDataUpdatedListener?.onDataUpdated(currentId)
         findNavController().popBackStack()
     }
 
-    interface OnDataUpdatedListener {
-        fun onDataUpdated(id: String)
-        fun onDataRemove(id: String)
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        try {
-            onDataUpdatedListener = context as OnDataUpdatedListener
-        } catch (_: ClassCastException) {
-        }
+    private fun createTodoItem(id: String, dateOfCreated: Date?, done: Boolean): TodoItem {
+        return TodoItem(
+            id,
+            binding.editText.text.toString(),
+            saveImportance,
+            saveDeadlineDate,
+            done,
+            Date(),
+            dateOfCreated
+        )
     }
 }
