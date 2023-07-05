@@ -13,5 +13,5 @@ data class TodoItem(
     val deadlineDate: Date?,
     var isDone: Boolean,
     val createdDate: Date,
-    val changedDate: Date? = null
+    var changedDate: Date? = null
 ) : Parcelable

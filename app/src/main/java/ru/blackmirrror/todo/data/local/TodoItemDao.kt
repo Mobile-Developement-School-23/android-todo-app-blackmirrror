@@ -26,9 +26,12 @@ interface TodoItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createTodoItem(vararg itemEntity: TodoItemEntity)
 
+    @Query("DELETE FROM todo_items")
+    suspend fun deleteAll()
+
     @Delete
     suspend fun deleteTodoItem(toDoItemEntity: TodoItemEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun initTodoItems(todoItems: List<TodoItemEntity>)
+    suspend fun mergeTodoItems(todoItems: List<TodoItemEntity>)
 }

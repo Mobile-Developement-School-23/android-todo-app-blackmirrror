@@ -2,7 +2,6 @@ package ru.blackmirrror.todo.presentation.fragments
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Room
@@ -22,6 +21,11 @@ import ru.blackmirrror.todo.data.api.NetworkState
 import ru.blackmirrror.todo.data.TodoRepository
 import ru.blackmirrror.todo.data.api.NetworkUtils
 import ru.blackmirrror.todo.data.local.TodoItemDb
+import ru.blackmirrror.todo.data.local.TodoOperationEntity
+import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_CREATE
+import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_DELETE
+import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_UPDATE
+import java.util.UUID
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -29,7 +33,7 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
 
     private val repository = TodoRepository(
         Room.databaseBuilder(context, TodoItemDb::class.java, "todo_items_db")
-        .build())
+        .build(), SharedPrefs(context))
     private val sharedPrefs: SharedPrefs = SharedPrefs(context)
 
     private val _tasks = MutableSharedFlow<List<TodoItem>>()
@@ -65,9 +69,9 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
                 run {
                     when (val response = repository.getRemoteTasks()) {
                         is NetworkState.Success -> {
-                            repository.initList(response.data.list.map { it.fromApiToTodoItem() }, sharedPrefs.getRevision())
-                           _tasks.emit(repository.getAllTodoItemsNoFlow())
                             sharedPrefs.putRevision(response.data.revision)
+                            repository.mergeList(response.data.list.map { it.fromApiToTodoItem() })
+                           _tasks.emit(repository.getAllTodoItemsNoFlow())
                             Log.d("REVISION", "fetchTodoList: ${sharedPrefs.getRevision()}")
                         }
                         is NetworkState.Error -> {
@@ -78,6 +82,9 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
                 }
             }
             wait.await()
+            withContext(Dispatchers.IO) {
+                repository.updateRemoteTasks(repository.getAllTodoItemsNoFlow())
+            }
         }
         else {
             val result = withContext(Dispatchers.IO) {
@@ -96,6 +103,13 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
                 }
             }
         }
+        else {
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.createOperation(
+                    TodoOperationEntity(UUID.randomUUID().toString(), todoItem.id, TAG_CREATE)
+                )
+            }
+        }
         viewModelScope.launch(Dispatchers.IO) {
             repository.createTodoItem(todoItem)
             _tasks.emit(repository.getAllTodoItemsNoFlow())
@@ -111,6 +125,13 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
                 }
             }
         }
+        else {
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.createOperation(
+                    TodoOperationEntity(UUID.randomUUID().toString(), newItem.id, TAG_UPDATE)
+                )
+            }
+        }
         viewModelScope.launch(Dispatchers.IO) {
             repository.updateTodoItem(newItem)
             _tasks.emit(repository.getAllTodoItemsNoFlow())
@@ -124,6 +145,13 @@ class TodoItemsViewModel(val context: Context): ViewModel() {
                     is NetworkState.Success -> println("Delete")
                     is NetworkState.Error -> toast("Пока не можем удалить данные")
                 }
+            }
+        }
+        else {
+            viewModelScope.launch(Dispatchers.IO) {
+                repository.createOperation(
+                    TodoOperationEntity(UUID.randomUUID().toString(), todoItem.id, TAG_DELETE)
+                )
             }
         }
         viewModelScope.launch(Dispatchers.IO) {

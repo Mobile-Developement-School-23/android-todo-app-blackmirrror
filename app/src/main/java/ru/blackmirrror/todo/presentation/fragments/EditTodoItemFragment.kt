@@ -171,7 +171,7 @@ class EditTodoItemFragment : Fragment() {
             todoItemsViewModel.createTask(
                 createTodoItem(
                     UUID.randomUUID().toString(),
-                    null,
+                    Date(),
                     false
                 )
             )

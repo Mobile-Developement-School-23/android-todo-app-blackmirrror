@@ -1,7 +1,6 @@
 package ru.blackmirrror.todo.presentation.utils
 
 import android.content.Context
-import android.util.Log
 import androidx.room.Room
 import androidx.work.Worker
 import androidx.work.WorkerParameters
@@ -15,7 +14,7 @@ class DataUpdateWorker(context: Context, workerParams: WorkerParameters) : Worke
 
     private val repository: TodoRepository = TodoRepository(
         Room.databaseBuilder(context, TodoItemDb::class.java, "todo_items_db")
-        .build())
+        .build(), SharedPrefs(context))
 
     private val sharedPrefs = SharedPrefs(context)
 
@@ -27,7 +26,9 @@ class DataUpdateWorker(context: Context, workerParams: WorkerParameters) : Worke
     private fun initData() = runBlocking {
         when (val response = repository.getRemoteTasks()) {
             is NetworkState.Success -> {
-                repository.initList(response.data.list.map { it.fromApiToTodoItem() }, sharedPrefs.getRevision())
+                sharedPrefs.putRevision(response.data.revision)
+                repository.mergeList(response.data.list.map { it.fromApiToTodoItem() })
+                repository.updateRemoteTasks(repository.getAllTodoItemsNoFlow())
             }
             is NetworkState.Error -> {
                 println("Internet error ${response.response.code()}")
