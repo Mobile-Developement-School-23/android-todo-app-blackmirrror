@@ -16,6 +16,7 @@ import ru.blackmirrror.todo.data.local.TodoItemEntity
 import ru.blackmirrror.todo.data.local.TodoOperationEntity
 import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_CREATE
 import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_DELETE
+import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_UPDATE
 import ru.blackmirrror.todo.data.models.TodoItem
 
 class TodoRepository(localDataSource: TodoItemDb, private val sharedPrefs: SharedPrefs) {
@@ -61,7 +62,7 @@ class TodoRepository(localDataSource: TodoItemDb, private val sharedPrefs: Share
                 Log.d("API", "mergeList: deleted not changed $localItem")
                 todoItemDao.deleteTodoItem(TodoItemEntity.fromTodoItemToEntity(localItem))
             }
-            else if (ops.find { it.additionalField == TAG_CREATE } == null) {
+            else if (ops.find { it.additionalField != TAG_DELETE} == null) {
                 Log.d("API", "mergeList: deleted not created $localItem")
                 todoItemDao.deleteTodoItem(TodoItemEntity.fromTodoItemToEntity(localItem))
             }

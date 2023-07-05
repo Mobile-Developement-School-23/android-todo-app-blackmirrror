@@ -86,6 +86,7 @@ class EditTodoItemFragment : Fragment() {
         binding.editDeleteBtn.setOnClickListener {
             todoItemsViewModel.deleteTask(currentTodoItem)
             findNavController().popBackStack()
+            //todoItemsViewModel.initData()
         }
     }
 
@@ -177,6 +178,7 @@ class EditTodoItemFragment : Fragment() {
             )
         }
         findNavController().popBackStack()
+        //todoItemsViewModel.initData()
     }
 
     private fun createTodoItem(id: String, dateOfCreated: Date?, done: Boolean): TodoItem {
