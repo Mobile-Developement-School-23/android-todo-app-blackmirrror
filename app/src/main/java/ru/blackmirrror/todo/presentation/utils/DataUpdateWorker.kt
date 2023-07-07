@@ -12,11 +12,8 @@ import ru.blackmirrror.todo.data.local.TodoItemDb
 
 class DataUpdateWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
 
-    private val repository: TodoRepository = TodoRepository(
-        Room.databaseBuilder(context, TodoItemDb::class.java, "todo_items_db")
-        .build(), SharedPrefs(context))
-
-    private val sharedPrefs = SharedPrefs(context)
+    private val repository: TodoRepository = locale()
+    private val sharedPrefs: SharedPrefs = locale()
 
     override fun doWork(): Result {
         initData()

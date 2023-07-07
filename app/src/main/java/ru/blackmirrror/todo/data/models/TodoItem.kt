@@ -11,7 +11,7 @@ data class TodoItem(
     val text: String,
     val importance: Importance,
     val deadlineDate: Date?,
-    var isDone: Boolean,
+    val isDone: Boolean,
     val createdDate: Date,
-    var changedDate: Date? = null
+    val changedDate: Date? = null
 ) : Parcelable

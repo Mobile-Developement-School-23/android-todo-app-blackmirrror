@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class ViewModelFactory() : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TodoItemsViewModel::class.java)) {
-            return TodoItemsViewModel(context) as T
+            return TodoItemsViewModel() as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

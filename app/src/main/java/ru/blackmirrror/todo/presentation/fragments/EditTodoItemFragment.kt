@@ -81,12 +81,13 @@ class EditTodoItemFragment : Fragment() {
             binding.editDeadline.text = formatDate(currentTodoItem.deadlineDate)
         }
         binding.editDeleteBtn.isEnabled = true
-        binding.editDeleteBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.color_red))
-        binding.ivDelete.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
+        binding.editDeleteBtn.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.color_red))
+        binding.ivDelete.imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.editDeleteBtn.setOnClickListener {
             todoItemsViewModel.deleteTask(currentTodoItem)
             findNavController().popBackStack()
-            //todoItemsViewModel.initData()
         }
     }
 
@@ -151,21 +152,24 @@ class EditTodoItemFragment : Fragment() {
 
         datePickerDialog.setCancelable(false)
         datePickerDialog.show()
-        datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
-        datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+        datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)
+            .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+        datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)
+            .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
     }
 
     private fun saveItem() {
         if (binding.editText.text.toString() == "") {
-            Toast.makeText(requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
             return
         }
         currentTodoItem?.let {
             todoItemsViewModel.updateTask(
                 createTodoItem(
-                    currentTodoItem!!.id,
-                    currentTodoItem!!.createdDate,
-                    currentTodoItem!!.isDone
+                    it.id,
+                    it.createdDate,
+                    it.isDone
                 )
             )
         }?: run {
@@ -178,7 +182,6 @@ class EditTodoItemFragment : Fragment() {
             )
         }
         findNavController().popBackStack()
-        //todoItemsViewModel.initData()
     }
 
     private fun createTodoItem(id: String, dateOfCreated: Date?, done: Boolean): TodoItem {
