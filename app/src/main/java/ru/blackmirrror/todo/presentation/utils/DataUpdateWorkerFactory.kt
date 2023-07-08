@@ -8,6 +8,10 @@ import ru.blackmirrror.todo.data.SharedPrefs
 import ru.blackmirrror.todo.data.TodoRepository
 import javax.inject.Inject
 
+/**
+ * Factory for successful DI in worker
+ */
+
 class DataUpdateWorkerFactory @Inject constructor(
     private val repository: TodoRepository,
     private val sharedPrefs: SharedPrefs

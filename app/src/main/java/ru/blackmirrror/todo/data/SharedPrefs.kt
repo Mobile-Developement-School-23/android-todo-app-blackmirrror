@@ -3,6 +3,10 @@ package ru.blackmirrror.todo.data
 import android.content.Context
 import android.util.Log
 
+/**
+ * Device data store
+ */
+
 class SharedPrefs(context: Context) {
 
     companion object {

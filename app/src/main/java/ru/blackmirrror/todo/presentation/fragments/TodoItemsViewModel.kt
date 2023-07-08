@@ -12,12 +12,16 @@ import kotlinx.coroutines.launch
 import ru.blackmirrror.todo.data.TodoRepository
 import ru.blackmirrror.todo.data.models.TodoItem
 
+/**
+ * ViewModel for work between repository and fragments
+ */
+
 class TodoItemsViewModel(private val repository: TodoRepository) : ViewModel() {
 
     private val _tasks = MutableSharedFlow<List<TodoItem>>()
     val tasks: SharedFlow<List<TodoItem>> = _tasks.asSharedFlow()
 
-    val countCompletedTask: Flow<Int> = _tasks.map { it -> it.count { it.isDone } }
+    val countCompletedTask: Flow<Int> = _tasks.map { items -> items.count { it.isDone } }
 
     init {
         initData()

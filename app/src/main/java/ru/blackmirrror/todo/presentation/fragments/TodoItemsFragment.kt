@@ -21,6 +21,9 @@ import ru.blackmirrror.todo.presentation.adapters.SwipeTodoItem
 import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
 import java.util.Date
 
+/**
+ * Base TodoItems fragment displays all items
+ */
 
 class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener {
 

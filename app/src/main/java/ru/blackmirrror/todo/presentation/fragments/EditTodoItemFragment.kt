@@ -25,6 +25,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 
+/**
+ * Add or edit fragment displays any item
+ */
 
 class EditTodoItemFragment : Fragment() {
 
@@ -140,7 +143,7 @@ class EditTodoItemFragment : Fragment() {
         )
 
         datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, "Готово") { _, _ ->
-            val year = datePickerDialog.datePicker.year - 1900
+            val year = datePickerDialog.datePicker.year - DEDUCTION_OF_THE_YEAR
             val month = datePickerDialog.datePicker.month
             val dayOfMonth = datePickerDialog.datePicker.dayOfMonth
             saveDeadlineDate = Date(year, month, dayOfMonth)
@@ -194,5 +197,9 @@ class EditTodoItemFragment : Fragment() {
             Date(),
             dateOfCreated
         )
+    }
+
+    companion object {
+        private const val DEDUCTION_OF_THE_YEAR = 1900
     }
 }

@@ -15,6 +15,10 @@ import ru.blackmirrror.todo.data.local.TodoItemDb
 import ru.blackmirrror.todo.presentation.fragments.ViewModelFactoryImpl
 import javax.inject.Singleton
 
+/**
+ * DI module for hilt includes provide methods
+ */
+
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {

@@ -7,6 +7,10 @@ import ru.blackmirrror.todo.data.models.ImportanceAdapter
 import ru.blackmirrror.todo.data.models.TodoItem
 import java.util.Date
 
+/**
+ * Responses and requests for api
+ */
+
 data class TodoResponseList(
     @SerializedName("status")
     val status: String,
@@ -55,13 +59,13 @@ data class TodoItemApi(
     val importance: Importance,
 
     @SerializedName("created_at")
-    val created_at: Long,
+    val createdAt: Long,
 
     @SerializedName("changed_at")
-    val changed_at: Long,
+    val changedAt: Long,
 
     @SerializedName("last_updated_by")
-    val last_updated_by: String,
+    val lastUpdatedBy: String,
 
     @SerializedName("text")
     val text: String
@@ -72,8 +76,8 @@ data class TodoItemApi(
         importance,
         deadline?.let { Date(it) },
         done,
-        Date(created_at),
-        Date(changed_at)
+        Date(createdAt),
+        Date(changedAt)
     )
     companion object {
         fun fromTodoItemToApi(toDoItem: TodoItem, deviseId: String): TodoItemApi {
@@ -83,9 +87,9 @@ data class TodoItemApi(
                 importance = toDoItem.importance,
                 deadline = toDoItem.deadlineDate?.time,
                 done = toDoItem.isDone,
-                created_at = toDoItem.createdDate.time,
-                changed_at = toDoItem.changedDate?.time ?: 0,
-                last_updated_by = deviseId,
+                createdAt = toDoItem.createdDate.time,
+                changedAt = toDoItem.changedDate?.time ?: 0,
+                lastUpdatedBy = deviseId,
                 color = null
             )
         }

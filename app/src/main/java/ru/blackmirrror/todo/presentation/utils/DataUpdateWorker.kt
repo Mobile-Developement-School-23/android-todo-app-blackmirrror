@@ -11,6 +11,10 @@ import ru.blackmirrror.todo.data.SharedPrefs
 import ru.blackmirrror.todo.data.TodoRepository
 import ru.blackmirrror.todo.data.api.NetworkState
 
+/**
+ * Worker to load and update data
+ */
+
 @HiltWorker
 class DataUpdateWorker @AssistedInject constructor(
     @Assisted context: Context,

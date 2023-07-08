@@ -17,6 +17,9 @@ import ru.blackmirrror.todo.presentation.fragments.ViewModelFactoryImpl
 import ru.blackmirrror.todo.presentation.utils.DataUpdateWorker
 import javax.inject.Inject
 
+/**
+ * Activity set up workManager for network state control
+ */
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {

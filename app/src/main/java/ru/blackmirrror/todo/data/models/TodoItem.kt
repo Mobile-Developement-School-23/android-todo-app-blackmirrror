@@ -5,6 +5,10 @@ import kotlinx.parcelize.Parcelize
 import ru.blackmirrror.todo.data.models.Importance
 import java.util.Date
 
+/**
+ * Base class TodoItem
+ */
+
 @Parcelize
 data class TodoItem(
     val id: String,

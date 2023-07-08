@@ -4,6 +4,10 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
+/**
+ * Entities for local database in operations table
+ */
+
 @Entity(tableName = "todo_operations")
 data class TodoOperationEntity(
     @PrimaryKey @ColumnInfo(name = "id") var id: String,

@@ -9,6 +9,10 @@ import com.google.gson.JsonSerializer
 import java.lang.reflect.Type
 import java.util.Locale
 
+/**
+ * Serialize and deserialize importance adapter
+ */
+
 class ImportanceAdapter : JsonSerializer<Importance>, JsonDeserializer<Importance> {
     override fun serialize(
         src: Importance?,

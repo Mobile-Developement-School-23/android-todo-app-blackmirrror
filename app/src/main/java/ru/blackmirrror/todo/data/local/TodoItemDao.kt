@@ -8,6 +8,10 @@ import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Local database CRUD-operations with items table
+ */
+
 @Dao
 interface TodoItemDao {
 
@@ -18,7 +22,7 @@ interface TodoItemDao {
     fun getTodoItemsNoFlow(): List<TodoItemEntity>
 
     @Query("SELECT * FROM todo_items WHERE id = :id")
-    fun getTodoItemById(id: String): TodoItemEntity
+    fun getTodoItemById(id: String): TodoItemEntity?
 
     @Update
     suspend fun updateTodoItem(toDoItemEntity: TodoItemEntity)

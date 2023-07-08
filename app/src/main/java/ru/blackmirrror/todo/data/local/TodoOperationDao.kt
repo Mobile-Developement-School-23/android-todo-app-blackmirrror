@@ -7,6 +7,10 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Local database CRUD-operations with operations table
+ */
+
 @Dao
 interface TodoOperationDao {
     @Query("SELECT * FROM todo_operations")
@@ -16,7 +20,7 @@ interface TodoOperationDao {
     fun getTodoOperationsNoFlow(): List<TodoOperationEntity>
 
     @Query("SELECT * FROM todo_operations WHERE todoItemId = :id")
-    fun getTodoOperationsByItemId(id: String): List<TodoOperationEntity>
+    fun getTodoOperationsByItemId(id: String): List<TodoOperationEntity>?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createTodoOperation(vararg operationEntity: TodoOperationEntity)

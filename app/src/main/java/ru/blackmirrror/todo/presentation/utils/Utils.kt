@@ -1,9 +1,12 @@
 package ru.blackmirrror.todo.presentation.utils
 
-import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+/**
+ * Date formatter change Date to String
+ */
 
 object Utils {
     fun formatDate(date: Date): String {

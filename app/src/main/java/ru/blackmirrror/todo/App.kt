@@ -7,6 +7,10 @@ import ru.blackmirrror.todo.presentation.utils.DataUpdateInitializer
 import ru.blackmirrror.todo.presentation.utils.DataUpdateWorkerFactory
 import javax.inject.Inject
 
+/**
+ * Custom Application class sets worker and start point for DI
+ */
+
 @HiltAndroidApp
 class App: Application(), Configuration.Provider {
 

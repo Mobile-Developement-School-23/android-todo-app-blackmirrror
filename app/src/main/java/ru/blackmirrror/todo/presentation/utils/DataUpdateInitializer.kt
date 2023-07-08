@@ -10,6 +10,10 @@ import androidx.work.WorkManager
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
+/**
+ * Initializer of worker
+ */
+
 class DataUpdateInitializer(context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
@@ -20,12 +24,16 @@ class DataUpdateInitializer(context: Context) {
 
     private fun enqueueDataUpdateWorker() {
         val dataUpdateWorkerRequest =
-            PeriodicWorkRequestBuilder<DataUpdateWorker>(8, TimeUnit.HOURS)
+            PeriodicWorkRequestBuilder<DataUpdateWorker>(REPEAT_INTERVAL, TimeUnit.HOURS)
             .build()
 
         workManager.enqueue(dataUpdateWorkerRequest).result.addListener(
             {
                 Log.d("WorkManager", "WorkManager result: Success")
             }, Executors.newSingleThreadExecutor())
+    }
+
+    companion object {
+        private const val REPEAT_INTERVAL: Long = 8
     }
 }
