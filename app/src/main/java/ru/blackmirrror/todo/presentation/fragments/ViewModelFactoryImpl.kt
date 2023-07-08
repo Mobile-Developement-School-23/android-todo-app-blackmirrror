@@ -1,13 +1,13 @@
 package ru.blackmirrror.todo.presentation.fragments
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import ru.blackmirrror.todo.data.TodoRepository
 
-class ViewModelFactory() : ViewModelProvider.Factory {
+class ViewModelFactoryImpl(private val repository: TodoRepository): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TodoItemsViewModel::class.java)) {
-            return TodoItemsViewModel() as T
+            return TodoItemsViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

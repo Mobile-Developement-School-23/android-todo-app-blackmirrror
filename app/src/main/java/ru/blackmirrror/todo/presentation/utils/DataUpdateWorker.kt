@@ -1,19 +1,22 @@
 package ru.blackmirrror.todo.presentation.utils
 
 import android.content.Context
-import androidx.room.Room
+import androidx.hilt.work.HiltWorker
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.runBlocking
 import ru.blackmirrror.todo.data.SharedPrefs
 import ru.blackmirrror.todo.data.TodoRepository
 import ru.blackmirrror.todo.data.api.NetworkState
-import ru.blackmirrror.todo.data.local.TodoItemDb
 
-class DataUpdateWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
-
-    private val repository: TodoRepository = locale()
-    private val sharedPrefs: SharedPrefs = locale()
+@HiltWorker
+class DataUpdateWorker @AssistedInject constructor(
+    @Assisted context: Context,
+    @Assisted workerParams: WorkerParameters,
+    private val repository: TodoRepository,
+    private val sharedPrefs: SharedPrefs) : Worker(context, workerParams) {
 
     override fun doWork(): Result {
         initData()

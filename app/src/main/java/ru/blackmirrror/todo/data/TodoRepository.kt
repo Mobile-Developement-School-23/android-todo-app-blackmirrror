@@ -4,11 +4,11 @@ import android.content.Context
 import ru.blackmirrror.todo.data.api.ApiService
 import ru.blackmirrror.todo.data.api.NetworkState
 import ru.blackmirrror.todo.data.api.NetworkUtils
+import ru.blackmirrror.todo.data.api.models.TodoItemApi
 import ru.blackmirrror.todo.data.api.models.TodoRequestElement
+import ru.blackmirrror.todo.data.api.models.TodoRequestList
 import ru.blackmirrror.todo.data.api.models.TodoResponseElement
 import ru.blackmirrror.todo.data.api.models.TodoResponseList
-import ru.blackmirrror.todo.data.api.models.TodoItemApi
-import ru.blackmirrror.todo.data.api.models.TodoRequestList
 import ru.blackmirrror.todo.data.local.TodoItemDb
 import ru.blackmirrror.todo.data.local.TodoItemEntity
 import ru.blackmirrror.todo.data.local.TodoOperationEntity
@@ -16,17 +16,15 @@ import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_CREATE
 import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_DELETE
 import ru.blackmirrror.todo.data.local.TodoOperationEntity.Companion.TAG_UPDATE
 import ru.blackmirrror.todo.data.models.TodoItem
-import ru.blackmirrror.todo.presentation.utils.locale
 import java.util.UUID
+import javax.inject.Inject
 
-class TodoRepository {
+class TodoRepository @Inject constructor(
+    val context: Context, database: TodoItemDb, private val apiService: ApiService) {
 
-    private val context: Context = locale()
-    private val localDataSource: TodoItemDb = locale()
-    private val sharedPrefs: SharedPrefs = locale()
-    private val apiService: ApiService = locale()
-    private val todoItemDao = localDataSource.todoItemDao()
-    private val todoOperationDao = localDataSource.todoOperationDao()
+    private val sharedPrefs = SharedPrefs(context)
+    private val todoItemDao = database.todoItemDao()
+    private val todoOperationDao = database.todoOperationDao()
 
     fun getAllTodoItemsNoFlow(): List<TodoItem> {
         return todoItemDao.getTodoItemsNoFlow().map { it.fromEntityToTodoItem() }

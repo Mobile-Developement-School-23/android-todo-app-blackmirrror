@@ -10,14 +10,19 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import dagger.hilt.android.AndroidEntryPoint
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.presentation.fragments.TodoItemsViewModel
-import ru.blackmirrror.todo.presentation.fragments.ViewModelFactory
+import ru.blackmirrror.todo.presentation.fragments.ViewModelFactoryImpl
 import ru.blackmirrror.todo.presentation.utils.DataUpdateWorker
+import javax.inject.Inject
 
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
+    @Inject
+    lateinit var viewModelFactoryImpl: ViewModelFactoryImpl
     private lateinit var viewModel: TodoItemsViewModel
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
@@ -25,8 +30,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val viewModelFactory = ViewModelFactory()
-        viewModel = ViewModelProvider(this, viewModelFactory)[TodoItemsViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactoryImpl)[TodoItemsViewModel::class.java]
 
         setContentView(R.layout.activity_main)
 
