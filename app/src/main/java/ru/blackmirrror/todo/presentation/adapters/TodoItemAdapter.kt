@@ -17,6 +17,9 @@ import ru.blackmirrror.todo.data.models.Importance
 import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
 
+/**
+ * Adapter and ViewHolder work with RecyclerView
+ */
 
 class TodoItemAdapter(
                       private val listener: RecyclerViewItemClickListener

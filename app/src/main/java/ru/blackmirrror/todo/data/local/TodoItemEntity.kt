@@ -7,6 +7,10 @@ import ru.blackmirrror.todo.data.models.Importance
 import ru.blackmirrror.todo.data.models.TodoItem
 import java.util.Date
 
+/**
+ * Entities for local database in items table
+ */
+
 @Entity(tableName = "todo_items")
 data class TodoItemEntity(
     @PrimaryKey @ColumnInfo(name = "id") var id: String,

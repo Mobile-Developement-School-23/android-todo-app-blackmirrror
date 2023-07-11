@@ -25,6 +25,9 @@ import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 
+/**
+ * Add or edit fragment displays any item
+ */
 
 class EditTodoItemFragment : Fragment() {
 
@@ -81,8 +84,10 @@ class EditTodoItemFragment : Fragment() {
             binding.editDeadline.text = formatDate(currentTodoItem.deadlineDate)
         }
         binding.editDeleteBtn.isEnabled = true
-        binding.editDeleteBtn.setTextColor(ContextCompat.getColor(requireContext(), R.color.color_red))
-        binding.ivDelete.imageTintList = ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
+        binding.editDeleteBtn.setTextColor(
+            ContextCompat.getColor(requireContext(), R.color.color_red))
+        binding.ivDelete.imageTintList =
+            ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.editDeleteBtn.setOnClickListener {
             todoItemsViewModel.deleteTask(currentTodoItem)
             findNavController().popBackStack()
@@ -138,7 +143,7 @@ class EditTodoItemFragment : Fragment() {
         )
 
         datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, "Готово") { _, _ ->
-            val year = datePickerDialog.datePicker.year - 1900
+            val year = datePickerDialog.datePicker.year - DEDUCTION_OF_THE_YEAR
             val month = datePickerDialog.datePicker.month
             val dayOfMonth = datePickerDialog.datePicker.dayOfMonth
             saveDeadlineDate = Date(year, month, dayOfMonth)
@@ -150,28 +155,31 @@ class EditTodoItemFragment : Fragment() {
 
         datePickerDialog.setCancelable(false)
         datePickerDialog.show()
-        datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
-        datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+        datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)
+            .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+        datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)
+            .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
     }
 
     private fun saveItem() {
         if (binding.editText.text.toString() == "") {
-            Toast.makeText(requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
             return
         }
         currentTodoItem?.let {
             todoItemsViewModel.updateTask(
                 createTodoItem(
-                    currentTodoItem!!.id,
-                    currentTodoItem!!.createdDate,
-                    currentTodoItem!!.isDone
+                    it.id,
+                    it.createdDate,
+                    it.isDone
                 )
             )
         }?: run {
             todoItemsViewModel.createTask(
                 createTodoItem(
                     UUID.randomUUID().toString(),
-                    null,
+                    Date(),
                     false
                 )
             )
@@ -189,5 +197,9 @@ class EditTodoItemFragment : Fragment() {
             Date(),
             dateOfCreated
         )
+    }
+
+    companion object {
+        private const val DEDUCTION_OF_THE_YEAR = 1900
     }
 }

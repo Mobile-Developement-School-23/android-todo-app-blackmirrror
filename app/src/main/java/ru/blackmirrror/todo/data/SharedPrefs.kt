@@ -1,6 +1,11 @@
 package ru.blackmirrror.todo.data
 
 import android.content.Context
+import android.util.Log
+
+/**
+ * Device data store
+ */
 
 class SharedPrefs(context: Context) {
 
@@ -14,9 +19,11 @@ class SharedPrefs(context: Context) {
     fun putRevision(revision: Int) {
         editor.putInt(REVISION_TAG, revision)
         editor.apply()
+        Log.d("REVISION", "putRevision: $revision")
     }
 
     fun getRevision() : Int {
+        Log.d("REVISION", "getRevision: ${sharedPreferences.getInt(REVISION_TAG, 0)}")
         return sharedPreferences.getInt(REVISION_TAG, 0)
     }
 }

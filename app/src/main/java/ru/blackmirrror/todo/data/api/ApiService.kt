@@ -14,6 +14,9 @@ import ru.blackmirrror.todo.data.api.models.TodoRequestList
 import ru.blackmirrror.todo.data.api.models.TodoResponseElement
 import ru.blackmirrror.todo.data.api.models.TodoResponseList
 
+/**
+ * Service of requests to server
+ */
 
 interface ApiService {
     @GET("list")

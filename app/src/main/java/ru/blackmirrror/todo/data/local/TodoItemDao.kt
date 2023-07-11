@@ -8,17 +8,21 @@ import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
+/**
+ * Local database CRUD-operations with items table
+ */
+
 @Dao
 interface TodoItemDao {
 
-    @Query("SELECT * FROM todo_items")
+    @Query("SELECT * FROM todo_items ORDER BY deadlineDate")
     fun getTodoItems(): Flow<List<TodoItemEntity>>
 
-    @Query("SELECT * FROM todo_items")
+    @Query("SELECT * FROM todo_items ORDER BY deadlineDate")
     fun getTodoItemsNoFlow(): List<TodoItemEntity>
 
     @Query("SELECT * FROM todo_items WHERE id = :id")
-    fun getTodoItemById(id: String): TodoItemEntity
+    fun getTodoItemById(id: String): TodoItemEntity?
 
     @Update
     suspend fun updateTodoItem(toDoItemEntity: TodoItemEntity)
@@ -26,9 +30,12 @@ interface TodoItemDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun createTodoItem(vararg itemEntity: TodoItemEntity)
 
+    @Query("DELETE FROM todo_items")
+    suspend fun deleteAll()
+
     @Delete
     suspend fun deleteTodoItem(toDoItemEntity: TodoItemEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun initTodoItems(todoItems: List<TodoItemEntity>)
+    suspend fun mergeTodoItems(todoItems: List<TodoItemEntity>)
 }

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -18,7 +19,11 @@ import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.databinding.FragmentTodoItemsBinding
 import ru.blackmirrror.todo.presentation.adapters.SwipeTodoItem
 import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
+import java.util.Date
 
+/**
+ * Base TodoItems fragment displays all items
+ */
 
 class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListener {
 
@@ -41,7 +46,7 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
         adapter = TodoItemAdapter(this)
 
         lifecycleScope.launch {
-            todoItemsViewModel.tasks.collect { tasks ->
+            todoItemsViewModel.tasks.flowWithLifecycle(lifecycle).collect { tasks ->
                 adapter.setList(tasks)
             }
         }
@@ -88,8 +93,9 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
     }
 
     override fun onCheckboxClicked(isChecked: Boolean, todoItem: TodoItem) {
-        todoItem.isDone = isChecked
-        todoItemsViewModel.updateTask(todoItem)
+        val newItem = TodoItem(todoItem.id, todoItem.text, todoItem.importance,
+            todoItem.deadlineDate, isChecked, todoItem.createdDate, Date())
+        todoItemsViewModel.updateTask(newItem)
     }
 
     override fun onItemClicked(id: String, todoItem: TodoItem) {

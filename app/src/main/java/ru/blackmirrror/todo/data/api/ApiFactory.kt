@@ -5,6 +5,10 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
+/**
+ * Factory is creating service
+ */
+
 object ApiFactory {
 
     private const val BASE_URL = "https://beta.mrdekk.ru/todobackend/"

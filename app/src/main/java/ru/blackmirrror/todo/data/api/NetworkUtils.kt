@@ -3,6 +3,9 @@ package ru.blackmirrror.todo.data.api
 import android.content.Context
 import android.net.ConnectivityManager
 
+/**
+ * Network availability check functionality
+ */
 
 object NetworkUtils {
     fun isInternetConnected(context: Context): Boolean {

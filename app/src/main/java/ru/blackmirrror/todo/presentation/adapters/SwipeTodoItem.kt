@@ -13,6 +13,10 @@ import androidx.recyclerview.widget.RecyclerView
 import ru.blackmirrror.todo.R
 import kotlin.math.roundToInt
 
+/**
+ * Swipe items functional
+ */
+
 class SwipeTodoItem(
     private val applicationContext: Context,
     private val onSwipeLeft: (position: Int) -> Unit,
@@ -31,8 +35,10 @@ class SwipeTodoItem(
             PorterDuff.Mode.SRC_IN
         )
     }
-    private val acceptIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_done)!!.toBitmap()
-    private val deleteIcon = AppCompatResources.getDrawable(applicationContext, R.drawable.ic_delete_white)!!.toBitmap()
+    private val acceptIcon = AppCompatResources.getDrawable(
+        applicationContext, R.drawable.ic_done)!!.toBitmap()
+    private val deleteIcon = AppCompatResources.getDrawable(
+        applicationContext, R.drawable.ic_delete_white)!!.toBitmap()
 
     override fun onMove(
         recyclerView: RecyclerView,
@@ -67,13 +73,15 @@ class SwipeTodoItem(
             val itemView = viewHolder.itemView
             if (dX > 0) {
                 c.drawRect(
-                    itemView.left.toFloat(), itemView.top.toFloat(), itemView.left.toFloat() + dX + convertDpToPx(8),
+                    itemView.left.toFloat(), itemView.top.toFloat(), itemView.left.toFloat()
+                            + dX + convertDpToPx(DP_FOR_RECT),
                     itemView.bottom.toFloat(), acceptSwipePaint
                 )
                 c.drawBitmap(
                     acceptIcon,
-                    itemView.left.toFloat() - convertDpToPx(40) + dX,
-                    itemView.top.toFloat() + (itemView.bottom.toFloat() - itemView.top.toFloat() - acceptIcon.height) / 2,
+                    itemView.left.toFloat() - convertDpToPx(DP_FOR_BITMAP) + dX,
+                    itemView.top.toFloat() + (itemView.bottom.toFloat()
+                            - itemView.top.toFloat() - acceptIcon.height) / 2,
                     whitePaint
                 )
             } else {
@@ -83,8 +91,9 @@ class SwipeTodoItem(
                 )
                 c.drawBitmap(
                     deleteIcon,
-                    itemView.right.toFloat() + convertDpToPx(40) - deleteIcon.width + dX,
-                    itemView.top.toFloat() + (itemView.bottom.toFloat() - itemView.top.toFloat() - deleteIcon.height) / 2,
+                    itemView.right.toFloat() + convertDpToPx(DP_FOR_BITMAP) - deleteIcon.width + dX,
+                    itemView.top.toFloat() + (itemView.bottom.toFloat()
+                            - itemView.top.toFloat() - deleteIcon.height) / 2,
                     whitePaint
                 )
 
@@ -94,5 +103,10 @@ class SwipeTodoItem(
     }
     private fun convertDpToPx(dp: Int): Int {
         return (dp * (applicationContext.resources.displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
+    }
+
+    companion object {
+        private const val DP_FOR_BITMAP = 40
+        private const val DP_FOR_RECT = 8
     }
 }
