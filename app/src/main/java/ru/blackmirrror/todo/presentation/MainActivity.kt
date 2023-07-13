@@ -9,6 +9,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import androidx.work.OneTimeWorkRequestBuilder
@@ -42,6 +44,7 @@ class MainActivity : AppCompatActivity() {
 
         viewModel = ViewModelProvider(this, viewModelFactoryImpl)[TodoItemsViewModel::class.java]
 
+        changeTheme(sharedPrefs.getTheme())
         setContentView(R.layout.activity_main)
         setUpConnectivityManager()
         checkNotifications()
@@ -51,6 +54,26 @@ class MainActivity : AppCompatActivity() {
         val taskId =  intent.getStringExtra("taskId")
         intent.removeExtra("taskId")
         return taskId
+    }
+
+    fun changeTheme(value: Int) {
+        when (value) {
+            (0) -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                setTheme(R.style.AppTheme)
+                sharedPrefs.putTheme(0)
+            }
+            (1) -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                setTheme(R.style.AppTheme)
+                sharedPrefs.putTheme(1)
+            }
+            (2) -> {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                setTheme(R.style.AppTheme_System)
+                sharedPrefs.putTheme(2)
+            }
+        }
     }
 
     private fun checkNotifications() {

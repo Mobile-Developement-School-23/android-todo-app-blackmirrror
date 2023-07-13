@@ -36,10 +36,10 @@
             android:text="Тема приложения" />
 
         <TextView
-            android:id="@+id/edit_importance"
+            android:id="@+id/settings_theme"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Системная"
+            android:text="Светлая"
             android:textColor="@color/label_tertiary"/>
 
     </LinearLayout>

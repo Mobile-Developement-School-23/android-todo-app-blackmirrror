@@ -5,6 +5,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import ru.blackmirrror.todo.R
@@ -37,6 +39,35 @@ class SettingsFragment : Fragment() {
         }
 
         sharedPrefs = SharedPrefs(requireContext())
-        val mainActivity = requireActivity() as MainActivity
+        setTheme(sharedPrefs.getTheme())
+        binding.settingsChangeTheme.setOnClickListener {
+            showPopUpMenu()
+        }
+    }
+
+    private fun showPopUpMenu() {
+        val popupMenu = PopupMenu(requireContext(), binding.settingsChangeTheme)
+        popupMenu.inflate(R.menu.theme)
+        popupMenu.setOnMenuItemClickListener { menuItem ->
+            val theme = when (menuItem.itemId) {
+                R.id.action_light -> 0
+                R.id.action_dark -> 1
+                R.id.action_system -> 2
+                else -> 0
+            }
+            val mainActivity = requireActivity() as MainActivity
+            sharedPrefs.putTheme(theme)
+            mainActivity.recreate()
+            true
+        }
+        popupMenu.show()
+    }
+
+    private fun setTheme(theme: Int) {
+        when (theme) {
+            (0) -> binding.settingsTheme.text = "Светлая"
+            (1) -> binding.settingsTheme.text = "Тёмная"
+            (2) -> binding.settingsTheme.text = "Системная"
+        }
     }
 }

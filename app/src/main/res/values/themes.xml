@@ -13,4 +13,18 @@
         <item name="android:textColorSecondary">@color/label_secondary</item>
         <item name="colorControlNormal">@color/color_blue</item>
     </style>
+
+    <style name="AppTheme.System" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:textColor">@color/black</item>
+        <item name="colorPrimary">@color/purple_200</item>
+        <item name="colorPrimaryDark">@color/purple_500</item>
+        <item name="colorAccent">@color/color_blue</item>
+
+        <item name="android:statusBarColor">@color/purple_200</item>
+
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/grey</item>
+        <item name="colorControlNormal">@color/color_blue</item>
+    </style>
 </resources>
