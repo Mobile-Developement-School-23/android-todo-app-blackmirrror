@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.ToDoLight" parent="Theme.Material3.DayNight.NoActionBar">
+    <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:textColor">@color/label_primary</item>
         <item name="colorPrimary">@color/back_primary</item>
         <item name="colorPrimaryDark">@color/back_primary</item>
@@ -12,6 +12,5 @@
         <item name="android:textColorPrimary">@color/label_primary</item>
         <item name="android:textColorSecondary">@color/label_secondary</item>
         <item name="colorControlNormal">@color/color_blue</item>
-
     </style>
 </resources>

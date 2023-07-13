@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.models.Importance
 import ru.blackmirrror.todo.data.models.TodoItem
-import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
+import ru.blackmirrror.todo.presentation.utils.Utils.fromDateToString
 
 /**
  * Adapter and ViewHolder work with RecyclerView
@@ -101,7 +101,7 @@ class TodoItemAdapter(
             }
             if (todoItem.deadlineDate != null) {
                 deadline.visibility = View.VISIBLE
-                deadline.text = formatDate(todoItem.deadlineDate)
+                deadline.text = fromDateToString(todoItem.deadlineDate)
             }
             else
                 deadline.visibility = View.GONE

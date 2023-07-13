@@ -10,18 +10,27 @@
         android:name="ru.blackmirrror.todo.presentation.fragments.TodoItemsFragment"
         android:label="fragment_todo_items"
         tools:layout="@layout/fragment_todo_items" >
+        <argument
+            android:name="taskId"
+            app:argType="string"
+            android:defaultValue="" />
         <action
             android:id="@+id/action_todoItemsFragment_to_editTodoItemFragment_create"
-            app:destination="@id/editTodoItemFragment">
+            app:destination="@id/editTodoItemFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_right">
             <argument
-                android:name="todoItem"
-                android:defaultValue="@null"
-                app:nullable="true"
-                app:argType="ru.blackmirrror.todo.data.models.TodoItem"/>
+                android:name="todoItemId"
+                app:argType="string"/>
         </action>
         <action
             android:id="@+id/action_todoItemsFragment_to_editTodoItemFragment_update"
             app:destination="@id/editTodoItemFragment" />
+        <action
+            android:id="@+id/action_todoItemsFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment"/>
     </fragment>
     <fragment
         android:id="@+id/editTodoItemFragment"
@@ -29,8 +38,12 @@
         android:label="fragment_edit_todo_item"
         tools:layout="@layout/fragment_edit_todo_item" >
         <argument
-            android:name="todoItem"
-            app:nullable="true"
-            app:argType="ru.blackmirrror.todo.data.models.TodoItem" />
+            android:name="todoItemId"
+            app:argType="string"/>
     </fragment>
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="ru.blackmirrror.todo.presentation.fragments.SettingsFragment"
+        android:label="fragment_settings"
+        tools:layout="@layout/fragment_settings" />
 </navigation>

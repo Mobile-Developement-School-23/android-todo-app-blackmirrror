@@ -5,13 +5,18 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkRequest
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.Navigation
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import dagger.hilt.android.AndroidEntryPoint
 import ru.blackmirrror.todo.R
+import ru.blackmirrror.todo.data.SharedPrefs
+import ru.blackmirrror.todo.presentation.fragments.TodoItemsFragmentDirections
 import ru.blackmirrror.todo.presentation.fragments.TodoItemsViewModel
 import ru.blackmirrror.todo.presentation.fragments.ViewModelFactoryImpl
 import ru.blackmirrror.todo.presentation.utils.DataUpdateWorker
@@ -26,6 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var viewModelFactoryImpl: ViewModelFactoryImpl
+    @Inject
+    lateinit var sharedPrefs: SharedPrefs
     private lateinit var viewModel: TodoItemsViewModel
     private lateinit var connectivityManager: ConnectivityManager
     private lateinit var networkCallback: ConnectivityManager.NetworkCallback
@@ -36,8 +43,34 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this, viewModelFactoryImpl)[TodoItemsViewModel::class.java]
 
         setContentView(R.layout.activity_main)
-
         setUpConnectivityManager()
+        checkNotifications()
+    }
+
+    fun getTaskIdFromIntent(): String? {
+        val taskId =  intent.getStringExtra("taskId")
+        intent.removeExtra("taskId")
+        return taskId
+    }
+
+    private fun checkNotifications() {
+        if (!sharedPrefs.getNotifications())
+            showDialog()
+    }
+
+    private fun showDialog() {
+        val dialogBuilder = AlertDialog.Builder(this)
+        dialogBuilder.setTitle("Разрешение на отправку уведомлений")
+        dialogBuilder.setMessage("Можем ли мы отправлять вам уведомления?")
+        dialogBuilder.setPositiveButton("Да") { dialog, _ ->
+            sharedPrefs.putNotifications(true)
+            dialog.dismiss()
+        }
+        dialogBuilder.setNegativeButton("Нет") { dialog, _ ->
+            dialog.dismiss()
+        }
+        val dialog = dialogBuilder.create()
+        dialog.show()
     }
 
     private fun setUpConnectivityManager() {

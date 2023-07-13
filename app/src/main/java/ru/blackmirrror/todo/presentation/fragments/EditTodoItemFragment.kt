@@ -1,7 +1,7 @@
 package ru.blackmirrror.todo.presentation.fragments
 
 import android.app.DatePickerDialog
-import android.content.Context
+import android.app.TimePickerDialog
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.util.Log
@@ -13,14 +13,17 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.models.Importance
 import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.databinding.FragmentEditTodoItemBinding
-import ru.blackmirrror.todo.presentation.utils.Utils.formatDate
+import ru.blackmirrror.todo.presentation.utils.Utils.fromDateToString
 import java.util.Calendar
 import java.util.Date
 import java.util.UUID
@@ -36,8 +39,12 @@ class EditTodoItemFragment : Fragment() {
     private val todoItemsViewModel: TodoItemsViewModel by activityViewModels()
 
     private var saveImportance: Importance = Importance.BASIC
-    private var saveDeadlineDate: Date? = null
+
+    //private var saveDeadlineDate: Date? = null
     private var currentTodoItem: TodoItem? = null
+    private var saveDeadlineLong: Long? = null
+
+    //private var notificationHelper = NotificationHelper(requireContext())
 
 
     override fun onCreateView(
@@ -54,12 +61,14 @@ class EditTodoItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val args: EditTodoItemFragmentArg = arguments?.let {
-            EditTodoItemFragmentArg(it.getParcelable("todoItem"))
-        } ?: throw IllegalArgumentException("Arguments not provided.")
-        currentTodoItem = args.todoItem
+        val id = arguments?.getString("todoItemId")?: ""
+        todoItemsViewModel.loadTaskById(id)
+
         lifecycleScope.launch {
-            currentTodoItem?.let { fillFields(it) }
+            todoItemsViewModel.currentItem.collect { item ->
+                currentTodoItem = item
+                currentTodoItem?.let { fillFields(it) }
+            }
         }
     }
 
@@ -80,12 +89,14 @@ class EditTodoItemFragment : Fragment() {
         saveImportance = currentTodoItem.importance
         setImportance(saveImportance)
         if (currentTodoItem.deadlineDate != null) {
-            saveDeadlineDate = currentTodoItem.deadlineDate
-            binding.editDeadline.text = formatDate(currentTodoItem.deadlineDate)
+            //saveDeadlineDate = currentTodoItem.deadlineDate
+            saveDeadlineLong = currentTodoItem.deadlineDate.time
+            binding.editDeadline.text = fromDateToString(currentTodoItem.deadlineDate)
         }
         binding.editDeleteBtn.isEnabled = true
         binding.editDeleteBtn.setTextColor(
-            ContextCompat.getColor(requireContext(), R.color.color_red))
+            ContextCompat.getColor(requireContext(), R.color.color_red)
+        )
         binding.ivDelete.imageTintList =
             ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.editDeleteBtn.setOnClickListener {
@@ -112,12 +123,15 @@ class EditTodoItemFragment : Fragment() {
                 R.id.action_default -> {
                     Importance.BASIC
                 }
+
                 R.id.action_lower -> {
                     Importance.LOW
                 }
+
                 R.id.action_higher -> {
                     Importance.IMPORTANT
                 }
+
                 else -> Importance.BASIC
             }
             setImportance(saveImportance)
@@ -136,35 +150,53 @@ class EditTodoItemFragment : Fragment() {
 
     private fun showDatePickerDialog() {
         val calendar = Calendar.getInstance()
-        val datePickerDialog = DatePickerDialog(requireContext(), null,
-            calendar.get(Calendar.YEAR),
-            calendar.get(Calendar.MONTH),
-            calendar.get(Calendar.DAY_OF_MONTH)
+        val currentYear = calendar.get(Calendar.YEAR)
+        val currentMonth = calendar.get(Calendar.MONTH)
+        val currentDayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
+        val currentHourOfDay = calendar.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = calendar.get(Calendar.MINUTE)
+
+        val dateTimePickerDialog = DatePickerDialog(
+            requireContext(),
+            { _, year, month, dayOfMonth ->
+                val timePickerDialog = TimePickerDialog(
+                    requireContext(),
+                    { _, hourOfDay, minute ->
+                        calendar.set(year, month, dayOfMonth, hourOfDay, minute)
+                        val selectedDateTimeMillis = calendar.timeInMillis
+                        saveDeadlineLong = selectedDateTimeMillis
+                        Log.d("NOTIFY", "showDatePickerDialog: $saveDeadlineLong")
+                        Log.d("NOTIFY", "showDatePickerDialog: ${Date(saveDeadlineLong!!)}")
+                        binding.editDeadline.text = fromDateToString(Date(saveDeadlineLong!!))
+                    },
+                    currentHourOfDay,
+                    currentMinute,
+                    true
+                )
+
+                timePickerDialog.show()
+                timePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)
+                    .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+                timePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)
+                    .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
+            },
+            currentYear,
+            currentMonth,
+            currentDayOfMonth
         )
 
-        datePickerDialog.setButton(DatePickerDialog.BUTTON_POSITIVE, "Готово") { _, _ ->
-            val year = datePickerDialog.datePicker.year - DEDUCTION_OF_THE_YEAR
-            val month = datePickerDialog.datePicker.month
-            val dayOfMonth = datePickerDialog.datePicker.dayOfMonth
-            saveDeadlineDate = Date(year, month, dayOfMonth)
-            binding.editDeadline.text = formatDate(Date(year, month, dayOfMonth))
-        }
-        datePickerDialog.setButton(DatePickerDialog.BUTTON_NEGATIVE, "Отмена") { _, _ ->
-            binding.editSwitchDeadline.isChecked = false
-        }
-
-        datePickerDialog.setCancelable(false)
-        datePickerDialog.show()
-        datePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)
+        dateTimePickerDialog.show()
+        dateTimePickerDialog.getButton(DatePickerDialog.BUTTON_POSITIVE)
             .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
-        datePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)
+        dateTimePickerDialog.getButton(DatePickerDialog.BUTTON_NEGATIVE)
             .setTextColor(ContextCompat.getColor(requireContext(), R.color.color_blue))
     }
 
     private fun saveItem() {
         if (binding.editText.text.toString() == "") {
             Toast.makeText(
-                requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT).show()
+                requireActivity(), "Пожалуйста, напишите текст дела", Toast.LENGTH_SHORT
+            ).show()
             return
         }
         currentTodoItem?.let {
@@ -175,14 +207,14 @@ class EditTodoItemFragment : Fragment() {
                     it.isDone
                 )
             )
-        }?: run {
-            todoItemsViewModel.createTask(
-                createTodoItem(
-                    UUID.randomUUID().toString(),
-                    Date(),
-                    false
-                )
+        } ?: run {
+            val task = createTodoItem(
+                UUID.randomUUID().toString(),
+                Date(),
+                false
             )
+            //notificationHelper.createNotification(task)
+            todoItemsViewModel.createTask(task)
         }
         findNavController().popBackStack()
     }
@@ -192,7 +224,8 @@ class EditTodoItemFragment : Fragment() {
             id,
             binding.editText.text.toString(),
             saveImportance,
-            saveDeadlineDate,
+            //saveDeadlineDate,
+            saveDeadlineLong?.let { Date(it) },
             done,
             Date(),
             dateOfCreated
