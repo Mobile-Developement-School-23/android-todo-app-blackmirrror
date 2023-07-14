@@ -4,21 +4,21 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import kotlinx.coroutines.Dispatchers
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.models.Importance
 import ru.blackmirrror.todo.data.models.TodoItem
@@ -39,12 +39,8 @@ class EditTodoItemFragment : Fragment() {
     private val todoItemsViewModel: TodoItemsViewModel by activityViewModels()
 
     private var saveImportance: Importance = Importance.BASIC
-
-    //private var saveDeadlineDate: Date? = null
     private var currentTodoItem: TodoItem? = null
     private var saveDeadlineLong: Long? = null
-
-    //private var notificationHelper = NotificationHelper(requireContext())
 
 
     override fun onCreateView(
@@ -62,12 +58,14 @@ class EditTodoItemFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val id = arguments?.getString("todoItemId")?: ""
-        todoItemsViewModel.loadTaskById(id)
+        if (id != "") {
+            todoItemsViewModel.loadTaskById(id)
 
-        lifecycleScope.launch {
-            todoItemsViewModel.currentItem.collect { item ->
-                currentTodoItem = item
-                currentTodoItem?.let { fillFields(it) }
+            lifecycleScope.launch {
+                todoItemsViewModel.currentItem.collect { item ->
+                    currentTodoItem = item
+                    currentTodoItem?.let { fillFields(it) }
+                }
             }
         }
     }
@@ -89,7 +87,6 @@ class EditTodoItemFragment : Fragment() {
         saveImportance = currentTodoItem.importance
         setImportance(saveImportance)
         if (currentTodoItem.deadlineDate != null) {
-            //saveDeadlineDate = currentTodoItem.deadlineDate
             saveDeadlineLong = currentTodoItem.deadlineDate.time
             binding.editDeadline.text = fromDateToString(currentTodoItem.deadlineDate)
         }
@@ -100,8 +97,7 @@ class EditTodoItemFragment : Fragment() {
         binding.ivDelete.imageTintList =
             ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.color_red))
         binding.editDeleteBtn.setOnClickListener {
-            todoItemsViewModel.deleteTask(currentTodoItem)
-            findNavController().popBackStack()
+            showCancelableSnackbar(binding.editDeleteBtn, currentTodoItem)
         }
     }
 
@@ -213,7 +209,6 @@ class EditTodoItemFragment : Fragment() {
                 Date(),
                 false
             )
-            //notificationHelper.createNotification(task)
             todoItemsViewModel.createTask(task)
         }
         findNavController().popBackStack()
@@ -224,12 +219,50 @@ class EditTodoItemFragment : Fragment() {
             id,
             binding.editText.text.toString(),
             saveImportance,
-            //saveDeadlineDate,
             saveDeadlineLong?.let { Date(it) },
             done,
             Date(),
             dateOfCreated
         )
+    }
+
+    private fun showCancelableSnackbar(view: View, todo: TodoItem) {
+        val snackbar = Snackbar.make(view, "Удалить ${todo.text}", Snackbar.LENGTH_INDEFINITE)
+            .setAction("Отменить") {
+                binding.editDeleteBtn.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.transparent))
+            }
+
+        val snackbarView = snackbar.view
+        val countdownDuration = 6000L
+        val countdownInterval = 1000L
+
+        val countDownTimer = object : CountDownTimer(countdownDuration, countdownInterval) {
+            override fun onTick(millisUntilFinished: Long) {
+                val seconds = millisUntilFinished / 1000
+                snackbar.setText("Удалить ${todo.text} \nОсталось: $seconds сек")
+            }
+            override fun onFinish() {
+                snackbar.dismiss()
+                currentTodoItem?.let { todoItemsViewModel.deleteTask(it) }
+                findNavController().popBackStack()
+            }
+        }
+        snackbar.addCallback(object : Snackbar.Callback() {
+            override fun onShown(sb: Snackbar?) {
+                binding.editDeleteBtn.backgroundTintList =
+                    ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.support_overlay))
+                countDownTimer.start()
+            }
+            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                countDownTimer.cancel()
+            }
+        })
+
+        val animation = AnimationUtils.loadAnimation(view.context, R.anim.slide_up)
+        snackbarView.animation = animation
+
+        snackbar.show()
     }
 
     companion object {
