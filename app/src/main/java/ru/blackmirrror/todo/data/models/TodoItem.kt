@@ -18,4 +18,8 @@ data class TodoItem(
     val isDone: Boolean,
     val createdDate: Date,
     val changedDate: Date? = null
-) : Parcelable
+) : Parcelable {
+    constructor() : this("-1", "", Importance.BASIC, null, false, Date(), Date())
+}
+
+

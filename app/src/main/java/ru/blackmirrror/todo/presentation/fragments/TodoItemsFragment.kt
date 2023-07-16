@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import ru.blackmirrror.todo.R
 import ru.blackmirrror.todo.data.models.TodoItem
 import ru.blackmirrror.todo.databinding.FragmentTodoItemsBinding
+import ru.blackmirrror.todo.presentation.MainActivity
 import ru.blackmirrror.todo.presentation.adapters.SwipeTodoItem
 import ru.blackmirrror.todo.presentation.adapters.TodoItemAdapter
 import java.util.Date
@@ -36,8 +37,18 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentTodoItemsBinding.inflate(inflater, container, false)
+        val mainActivity = requireActivity() as MainActivity
+        val taskId = mainActivity.getTaskIdFromIntent()
+        Log.d("NOTIFY", "onCreate: $taskId")
+        if (taskId != null) {
+            val action =
+                TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate(
+                    taskId
+                )
+            findNavController().navigate(action)
+        }
         initFields()
         return binding.root
     }
@@ -71,10 +82,15 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
         initSwipes(adapter)
 
         binding.floatingButton.setOnClickListener {
-            val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate()
+            val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate("")
             findNavController().navigate(action)
         }
         binding.toolbarMain.title = "Мои дела"
+
+        binding.brnSettings.setOnClickListener {
+            val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToSettingsFragment()
+            findNavController().navigate(action)
+        }
     }
 
     private fun initSwipes(adapter: TodoItemAdapter) {
@@ -100,7 +116,7 @@ class TodoItemsFragment : Fragment(), TodoItemAdapter.RecyclerViewItemClickListe
 
     override fun onItemClicked(id: String, todoItem: TodoItem) {
         Log.d("API", "onItemClicked: $todoItem")
-        val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate(todoItem)
+        val action = TodoItemsFragmentDirections.actionTodoItemsFragmentToEditTodoItemFragmentCreate(todoItem.id)
         findNavController().navigate(action)
     }
 }
